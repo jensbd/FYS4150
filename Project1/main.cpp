@@ -87,6 +87,5 @@ int main(int argc, char* argv[]){
     delete [] c;
     delete [] analytic;
     delete [] v;
-    cout << "Hei" << endl;
     return 0;
 }
