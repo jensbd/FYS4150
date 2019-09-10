@@ -2,8 +2,11 @@
 #include <fstream>
 #include <cmath>
 #include <iomanip>
+#include "time.h"
+
 using namespace std;
 ofstream ofile;
+
 double solution(double x){
     return 1.0-(1-exp(-10))*x-exp(-10*x);
 }
@@ -57,6 +60,9 @@ int main(int argc, char* argv[]){
     double b_temp = b[1];
     v[1] = rhs[1]/(b_temp);
 
+    clock_t start, finish;
+    start = clock();
+    cout << "Start: " << start << endl;
     //Forward substitution
     for (int i = 2; i <= n; i++){
         diag_temp[i] = c[i-1]/b_temp;
@@ -68,7 +74,11 @@ int main(int argc, char* argv[]){
     for (int i = n; i>=1; i--){
         v[i] -= diag_temp[i+1]*v[i+1];
     }
+    finish = clock();
 
+    //Print amount of time used by algorithm
+    cout << "Finish: "<< finish << endl;
+    cout << "General algorithm time: "  << ( double(finish - start)/double(CLOCKS_PER_SEC) ) << endl;
     //Output to file
     ofile.open(filename);
     ofile << setiosflags(ios::showpoint | ios::uppercase);
