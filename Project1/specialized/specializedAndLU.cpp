@@ -3,8 +3,12 @@
 #include <cmath>
 #include <iomanip>
 #include "time.h"
+#include <algorithm>
+#include <armadillo>
 using namespace std;
+using namespace arma;
 ofstream ofile;
+void LU(int n);
 double solution(double x){
     return 1.0-(1-exp(-10))*x-exp(-10*x);
 }
@@ -67,6 +71,18 @@ int main(int argc, char* argv[]){
     //Print amount of time used by algorithm
     cout << "Finish: " << finish << endl;
     cout << "Specialized algorithm time: "<<(( double(finish - start))/(double(CLOCKS_PER_SEC) )) << endl;
+
+    //Relative error
+    double *e = new double[n+1];
+    double maxerror = 0.0;
+    for (int i = 1; i < n; i++){
+        double error = log10(abs((v[i]-analytic[i])/analytic[i]));
+        e[i] = error;
+        if ( abs(error) > abs(maxerror)){
+            maxerror = error;
+        }
+    }
+    cout << "Max error: " << maxerror<< endl;
     //Output to file
     ofile.open(filename);
     ofile << setiosflags(ios::showpoint | ios::uppercase);
@@ -77,11 +93,37 @@ int main(int argc, char* argv[]){
         ofile << setw(15) << setprecision(8) <<v[i]<< endl;
     }
     ofile.close();
-
     delete [] x;
     delete [] rhs;
     delete [] b;
     delete [] analytic;
     delete [] v;
+    //Run LU decomp
+    LU(n);
+
     return 0;
+}
+
+void LU(int n){
+    mat A(n+2,n+2, fill::zeros); //n+2 to include the boundary conditions
+    vec v(n+2, fill::zeros);
+    vec x(n+2);
+    vec rhs(n+2);
+    v[0] = v[n+2] = 0;
+    double h = 1.0/double(n-1);
+    //Fill in for a, b and c
+    A.diag(0).fill(2);
+    A.diag(-1).fill(-1);
+    A.diag(1).fill(1);
+    for (int i = 0; i <n+2; i++){
+        x[i] = i*h;
+        rhs[i] = h*h*f(x[i]);
+    }
+    clock_t lustart, lufinish;
+    lustart = clock();
+    cout << "LU start: " << lustart << endl;
+    v = solve(A,rhs);
+    lufinish = clock();
+    cout << "LU finish: " << lufinish << endl;
+    cout << "LU time: "<<(( double(lufinish - lustart))/(double(CLOCKS_PER_SEC) )) << endl;
 }
