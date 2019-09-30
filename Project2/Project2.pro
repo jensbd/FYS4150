@@ -16,5 +16,5 @@ LIBS += \
     -lblas_win64_MT
 
 HEADERS += \
-    catch.hpp \
+    catch.hpp\
     jacobi.h
