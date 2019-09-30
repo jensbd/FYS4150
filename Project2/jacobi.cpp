@@ -1,6 +1,8 @@
 #include <iostream>
 #include <armadillo>
 #include <cmath>
+#include "time.h"
+#include "jacobi.h"
 using namespace std;
 using namespace arma;
 
@@ -68,7 +70,7 @@ void offdiag(mat A, int& p, int& q, int n){
 
 
 int main()
-{   int n = 400;
+{   int n = 5;
     float Rmax = 10.0;
     double h = Rmax/(n+1);
     double d = 2/(h*h);
@@ -86,9 +88,17 @@ int main()
 
     //mat eigenvectors = eigenvec(A);
     Mat<double> eigenvectors(n,n, fill::zeros);
-    eigenvectors.diag(0).fill(1.0);
-    vec eigenvalues = eig_sym(A);
-    //cout << "Starting eigvalues" << eigenvalues << endl;
+    //eigenvectors.diag(0).fill(1.0);
+
+    vec values;
+    mat vectors;
+    clock_t start, finish;
+    start = clock();
+    cout << "Start: " << start << endl;
+    eig_sym(values, vectors, A);
+    finish = clock();
+    cout << "Finish: "<< finish << endl;
+    cout << "Eig_sym time: "  << ( double(finish - start)/double(CLOCKS_PER_SEC) ) << endl;
 
     double tol = 1.0E-8;
     int iterations = 0;
@@ -98,6 +108,10 @@ int main()
     offdiag(A,p,q,n);
     double maxnondiag = fabs(a);
 
+    //Time Jacobi's method
+    clock_t start2, finish2;
+    start2 = clock();
+    cout << "Start: " << start2 << endl;
     //Perform Jacobi's method until the off-diagonals are almost zero
     while(maxnondiag > tol && iterations <= maxiter){
         //mat eigenvectors = eigenvec(A);
@@ -106,18 +120,28 @@ int main()
         maxnondiag = fabs(A(p,q));
         iterations ++;
     }
+    finish2 = clock();
+    cout << "Finish: "<< finish2 << endl;
+    cout << "Jacobi's method time: "  << ( double(finish2 - start2)/double(CLOCKS_PER_SEC) ) << endl;
+
     cout << "No. of iterations:" << iterations << endl;
-    //cout << "Matrix diagonal sorted" << endl;
+    cout << "Analytical eigenvalues" << endl;
+    vec analyticalLambdas(n, fill::zeros);
+    for (int i = 0; i < n; i++){
+        double lamb = d + 2*a*cos((i+1)*M_PI/(n+1));
+        analyticalLambdas(i) = lamb;
+        cout << lamb << endl;
+    }
+    cout << "Matrix diagonal sorted" << endl;
     vec diag = diagvec(A);
     diag = sort(diag);
-    //cout << diag << endl;
+    cout << diag << endl;
+    cout << "Average difference"<< endl <<mean(diag - analyticalLambdas) << endl;
     //cout << "Eigenvalues" << endl;
-    vec values;
-    mat vectors;
-    eig_sym(values, vectors, A);
+
     //cout << values << endl;
 
-    //cout << "Difference"<< endl <<values - eigenvalues << endl;
+
     return 0;
 }
 
