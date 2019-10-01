@@ -2,7 +2,6 @@
 #include <armadillo>
 #include <cmath>
 #include "time.h"
-#include "jacobi.h"
 using namespace std;
 using namespace arma;
 
@@ -71,21 +70,27 @@ void offdiag(mat A, int& p, int& q, int n){
 
 int main()
 {
-    int n = 5;
-    float Rmax = 10.0;
-    double h = Rmax/(n+1);
-    double d = 2/(h*h);
-    double a = -1/(h*h);
+    int n = 200;
+    float rho_min = 0.0;
+    float rho_max = 50.0;
+    double h = (rho_max-rho_min)/(n+1);
+    vec rho = vec(n);
+    for (int i = 0; i < n; i++){
+        rho(i) = (i+1)*h +rho_min;
+    }
+    double omega = 1.0/(115.299);
+    //Element-wise multiplication
+    vec V =  omega*omega*rho%rho + 1/rho;
+    vec d = 2.0/(h*h) + V;
+    double a = -1.0/(h*h);
+    vec e = vec(n-1);
+    e.fill(a);
     Mat<double> A(n, n, fill::zeros);
 
-    //Fill the matrix tridiagonally
-    for(int i=0; i<n; i++){
-        A(i,i) = d;
-        if (i< n-1){
-            A(i,i+1) = a;
-            A(i+1,i) = a;
-        }
-    }
+    //Filling the matrix
+    A.diag() = d;
+    A.diag(1) = e;
+    A.diag(-1) = e;
 
     Mat<double> eigenvectors(n,n, fill::zeros);
 
@@ -124,25 +129,12 @@ int main()
     cout << "Jacobi's method time: "  << ( double(finish2 - start2)/double(CLOCKS_PER_SEC) ) << endl;
 
     cout << "No. of iterations:" << iterations << endl;
-    cout << "Analytical eigenvalues" << endl;
-    vec analyticalLambdas(n, fill::zeros);
-    for (int i = 0; i < n; i++){
-        double lamb = d + 2*a*cos((i+1)*M_PI/(n+1));
-        analyticalLambdas(i) = lamb;
-        cout << lamb << endl;
-    }
-    cout << "Matrix diagonal sorted" << endl;
     vec diag = diagvec(A);
     diag = sort(diag);
-    cout << diag << endl;
-    cout << "Average difference"<< endl <<mean(diag - analyticalLambdas) << endl;
-    //cout << "Eigenvalues" << endl;
-
-    //cout << values << endl;
+    for (int i = 0; i < 4; i++){
+        cout << diag(i) << endl;
+    }
 
 
     return 0;
 }
-
-
-
