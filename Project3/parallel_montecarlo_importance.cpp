@@ -12,7 +12,7 @@ double exponential_MC(double *);
 int main(){
   double const  pi = 3.14159265359;
 
-  int nImportance = 7*pow(10,7);   //Number of simulations for importance sampling MC.
+  int nImportance = pow(10,7);   //Number of simulations for importance sampling MC.
   double xMCimportance[6], fxImportance;
   double int_mcImportance = 0.; double varianceImportance = 0.;
   double sum_sigmaImportance = 0;long idum2 = -1;

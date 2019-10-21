@@ -1,7 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include "time.h"
-#include "gauleg.cpp"
+#include "gauss_legendre.cpp"
 #include "gauss_laguerre.cpp"
 #include "ran0.cpp"
 
@@ -18,8 +18,8 @@ int main()
     // Integration limits a and b:
          double a = -3;
          double b = 3;
-         int Nleg = 50;
-         int Nlag = 10;
+         int Nleg = 5;
+         int Nlag = 5;
          double const  pi = 3.14159265359;
     // The Analytical solution which is known for the integral we want to solve:
          double Analytical = 5*pi*pi/(16*16);
@@ -99,7 +99,7 @@ int main()
               << "Analytical: " << Analytical << endl
               << "Computation time: " << ComputationTimeLag << endl;
 
-         int nBrute = 2*pow(10, 7);
+         int nBrute = pow(10, 7);
          double xMCbrute[6], fxBrute;
          double int_mcBrute = 0.; double varianceBrute = 0.;
          double sum_sigmaBrute = 0. ; long idum = -1 ;
@@ -130,7 +130,7 @@ int main()
               << "Sigma: " << jacobidetBrute*sqrt(varianceBrute/((double) nBrute)) << endl
               << "Computation time: " << ComputationTimeMCbrute << endl;
 
-         int nImportance = 7*pow(10,7);   //Number of simulations for importance sampling MC.
+         int nImportance = pow(10,7);   //Number of simulations for importance sampling MC.
          double xMCimportance[6], fxImportance;
          double int_mcImportance = 0.; double varianceImportance = 0.;
          double sum_sigmaImportance = 0; long idum2 = -1;
