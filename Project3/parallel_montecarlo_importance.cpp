@@ -12,7 +12,7 @@ double exponential_MC(double *);
 int main(){
   double const  pi = 3.14159265359;
 
-  int nImportance = pow(10,7);   //Number of simulations for importance sampling MC.
+  int nImportance = pow(10,5);   //Number of simulations for importance sampling MC.
   double xMCimportance[6], fxImportance;
   double int_mcImportance = 0.; double varianceImportance = 0.;
   double sum_sigmaImportance = 0;long idum2 = -1;
@@ -21,19 +21,19 @@ int main(){
   // Start timing importance sampling Monte Carlo:
   double start4, finish4;
 
+
+  int numthreads = 4;
   omp_set_dynamic(0);
-  omp_set_num_threads(10);
-  int numthreads = 0;
+  omp_set_num_threads(4);
+  nImportance = nImportance/numthreads;
   start4 = omp_get_wtime();
   #pragma omp parallel
   {
     //Different seed for each thread
-    numthreads = omp_get_num_threads();
     idum2 = omp_get_thread_num();
     #pragma omp for private(xMCimportance) reduction(+:fxImportance) reduction(+:sum_sigmaImportance)
     for (int i = 1; i <= nImportance; i++){
 
-        //cout << omp_get_num_threads() << endl;
         xMCimportance[0] = (-1./4)*log(1-ran0(&idum2));
         xMCimportance[1] = (-1./4)*log(1-ran0(&idum2));
         xMCimportance[2] = pi*ran0(&idum2);
@@ -54,7 +54,7 @@ int main(){
 
   cout << endl
        << "Threads: " << numthreads << endl
-       << "N: " << nImportance << endl
+       << "N: " << nImportance*numthreads << endl
        << "Montecarlo (Importance): " << jacobidetImportance*int_mcImportance << endl
        << "Sigma: " << jacobidetImportance*sqrt(varianceImportance/((double) nImportance)) << endl
        << "Computation time: " << ComputationTimeMCimportance << endl;
