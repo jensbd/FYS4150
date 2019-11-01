@@ -57,15 +57,17 @@ int main(int argc, char* argv[])
   fileout.append(argument);
   ofile.open(fileout);
 
-  ofile << "| Temperature | Energy-Mean | Magnetization-Mean|    Cv    | Susceptibility |\n";
+  ofile << "|   # Monte Carlo cycles  | Energy-Mean | Magnetization-Mean | # Accepted configurations |  Specific heat  | Susceptibility | Temperature |\n";
+
+  int Nconfigs;
 
   // Start Monte Carlo sampling by looping over the selcted Temperatures
   //for (double Temperature = InitialTemp; Temperature <= FinalTemp; Temperature+=TempStep){
   vec ExpectationValues = zeros<mat>(5);
   // Start Monte Carlo computation and get expectation values
-  MetropolisSampling(NSpins, MCcycles, Temp, ExpectationValues);
+  MetropolisSampling(NSpins, MCcycles, Temp, ExpectationValues, Nconfigs, false);
 
-  WriteResultstoFile(ofile, NSpins, MCcycles, Temp, ExpectationValues);
+  WriteResultstoFile(ofile, NSpins, MCcycles, Temp, ExpectationValues, Nconfigs);
  // }
   ofile.close();  // close output file
 
@@ -79,7 +81,7 @@ int main(int argc, char* argv[])
 
   ofile.open(file);
   //ofile << setiosflags(ios::showpoint | ios::uppercase);
-  ofile << "| Temperature | Energy-Mean | Magnetization-Mean|    Cv    | Susceptibility |\n";
+  ofile << "|   # Monte Carlo cycles  | Energy-Mean | Magnetization-Mean | # Accepted configurations |  Specific heat  | Susceptibility | Temperature |\n";
   // Start Monte Carlo sampling by looping over the selcted Temperatures
   int N;
   long int MC;
@@ -96,9 +98,9 @@ int main(int argc, char* argv[])
     vec ExpectationValue = zeros<mat>(5);
     iterations = 100*i;
     // Start Monte Carlo computation and get expectation values
-    MetropolisSampling(N, iterations, T, ExpectationValue);
+    MetropolisSampling(N, iterations, T, ExpectationValue, Nconfigs, false);
     //
-    WriteResultstoFile(ofile, N, iterations, T, ExpectationValue);
+    WriteResultstoFile(ofile, N, iterations, T, ExpectationValue, Nconfigs);
   }
   ofile.close();  // close output file
 
@@ -110,7 +112,7 @@ int main(int argc, char* argv[])
 
   ofile.open(file2);
   //ofile << setiosflags(ios::showpoint | ios::uppercase);
-  ofile << "| Temperature | Energy-Mean | Magnetization-Mean|    Cv    | Susceptibility |\n";
+  ofile << "| # Monte Carlo cycles  |  Energy-Mean   |  Magnetization-Mean  |  # Accepted configurations  |  Specific heat  |  Susceptibility   |  Temperature |\n";
 
 
   int iterations2;
@@ -118,9 +120,9 @@ int main(int argc, char* argv[])
     vec ExpectationValue2 = zeros<mat>(5);
     iterations2 = 100*i;
     // Start Monte Carlo computation and get expectation values
-    MetropolisSampling2(N, iterations2, T, ExpectationValue2);
+    MetropolisSampling(N, iterations2, T, ExpectationValue2, Nconfigs, true);
     //
-    WriteResultstoFile(ofile, N, iterations2, T, ExpectationValue2);
+    WriteResultstoFile(ofile, N, iterations2, T, ExpectationValue2, Nconfigs);
   }
   ofile.close();  // close output file
 
