@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-
-filenames = ["Lattice2","c_ordered","c_unordered"]
+import numpy as np
+filenames = ["c_unordered","c_ordered"]
 
 
 for i in (filenames):
@@ -26,24 +26,35 @@ for i in (filenames):
         susceptibility.append(float(pieces[5]))
         temperature.append(float(pieces[6]))
 
+
+
     plt.figure()
-    plt.plot(MCcycles, energy_mean, "o")
+    plt.plot(MCcycles, energy_mean, ".")
+    #plt.axis([0, 5000,-2.1,-1.8])
     plt.xlabel("# of Monte Carlo cycles")
     plt.ylabel("Energy expectation value")
-    plt.figure()
-    plt.plot(MCcycles, mag_mean, "o")
+
+    plt.figure(),
+    plt.plot(MCcycles, mag_mean, ".")
+    #plt.axis([0, 5000,-2.1,-1.8])
     plt.xlabel("# of Monte Carlo cycles")
     plt.ylabel("Magnetization expectation value")
+
     plt.figure()
-    plt.plot(MCcycles, Nconfigs, "o")
+    plt.plot(MCcycles, Nconfigs, ".")
+    #plt.axis([0, 5000,-2.1,-1.8])
     plt.xlabel("# of Monte Carlo cycles")
     plt.ylabel("# of accepted configurations")
+
     plt.figure()
-    plt.plot(MCcycles, Cv, "o")
+    plt.plot(MCcycles, Cv, ".")
+    #plt.axis([0, 5000,-2.1,-1.8])
     plt.xlabel("# of Monte Carlo cycles")
     plt.ylabel("Specific heat")
+
     plt.figure()
-    plt.plot(MCcycles, susceptibility, "o")
+    plt.plot(MCcycles, susceptibility, ".")
+    #plt.axis([0, 5000,-2.1,-1.8])
     plt.xlabel("# of Monte Carlo cycles")
     plt.ylabel("Susceptibility")
 plt.show()
