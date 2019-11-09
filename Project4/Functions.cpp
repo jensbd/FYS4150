@@ -58,19 +58,29 @@ void MetropolisSampling(int NSpins, int MCcycles, double Temperature, vec &Expec
 	  MagneticMoment += (double) 2*SpinMatrix(ix,iy);
 	  Energy += (double) deltaE;
 
-    // Probability counting
 
-    for (int i = 0; i < 400; i++){
-      Energies(i) = -800 + 4*i;
-    }
 
-    if (MCcycles >= 2000){
-      Probability(Energy, Energies, counter);
-    }
 
-	}
+
+
       }
     }
+	}
+
+  if (fabs(Energy + 796) < 1E-6){
+    cout << "Hurra \n";
+  }
+  // Probability counting
+
+  for (int i = 0; i < 400; i++){
+    Energies(i) = -800 + 4*i;
+  }
+
+  if (MCcycles >= 1000){
+    Probability(Energy, Energies, counter);
+  }
+
+
     // update expectation values  for local node
     ExpectationValues(0) += Energy;    ExpectationValues(1) += Energy*Energy;
     ExpectationValues(2) += MagneticMoment;
@@ -154,13 +164,39 @@ void WriteResultstoFile(ofstream& ofile, int NSpins, int MCcycles, double temper
   //ofile << setw(15) << setprecision(8) << Mabs_ExpectationValues/NSpins/NSpins << endl;
 } // end output function
 
+
+
+void WriteResultstoFile2(ofstream& ofile, int NSpins, int MCcycles, double temperature, vec ExpectationValues, int Nconfigs)
+{
+  double norm = 1.0/((double) (MCcycles));  // divided by  number of cycles
+  double E_ExpectationValues = ExpectationValues(0)*norm;
+  double E2_ExpectationValues = ExpectationValues(1)*norm;
+  double M_ExpectationValues = ExpectationValues(2)*norm;
+  double M2_ExpectationValues = ExpectationValues(3)*norm;
+  double Mabs_ExpectationValues = ExpectationValues(4)*norm;
+
+
+  // all expectation values are per spin, divide by 1/NSpins/NSpins
+  double Evariance = (E2_ExpectationValues- E_ExpectationValues*E_ExpectationValues)/NSpins/NSpins;
+  double Mvariance = (M2_ExpectationValues - Mabs_ExpectationValues*Mabs_ExpectationValues)/NSpins/NSpins;
+  ofile << setiosflags(ios::showpoint | ios::uppercase);
+  //ofile << "| Temperature | Energy-Mean | Magnetization-Mean|    Cv    | Susceptibility |\n";
+  ofile << "\n";
+  ofile << setw(15) << setprecision(8) << temperature;
+  ofile << setw(15) << setprecision(8) << E_ExpectationValues/NSpins/NSpins; // Mean energy
+  ofile << setw(15) << setprecision(8) << Mabs_ExpectationValues/NSpins/NSpins; // Mean magetization
+  ofile << setw(20) << setprecision(8) << Evariance/temperature/temperature; // Specific heat Cv
+  ofile << setw(20) << setprecision(8) << Mvariance/temperature; // Susceptibility
+} // end output function
+
+
 // Function for counting the energy states => probability analysis for 4d
 
 void Probability(double Energy, vec &Energies, vec &counter){
-  double tol = 1E-6;
+  double tol = 1E-10;
   for (int i = 0; i < 400; i++){
     if (fabs(Energy - Energies(i)) <= tol){
-      counter(i) ++;
+      counter(i) += 1;
     }
   }
 }
