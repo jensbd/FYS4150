@@ -175,8 +175,72 @@ int main(int argc, char* argv[])
   Writeprobabilities(ofile, Energies, counter);
   ofile.close();  // close output file
 
+
+/*
+cout << "Project Task 4e: " << endl;
+
+string file = "Temperature";
+
+ofile.open(file);
+ofile << "| Temperature | Energy-Mean | Magnetization-Mean |  Specific heat  | Susceptibility |\n";
+
+// Start Monte Carlo sampling by looping over the selcted Temperatures
+int N_start, N_step, N_final;
+long int MC;
+double T_start, T_step, T_final, T;
+
+// cout << "Read in the number of spins" << endl;
+// cin >> N;
+cout << "Read in the number of Monte Carlo cycles" << endl;
+cin >> MC;
+
+
+cout << "Read in the initial value for the Temperature" << endl;
+cin >> T_start;
+cout << "Read in the step size for the Temperature" << endl;
+cin >> T_step;
+cout << "Read in the final value for the Temperature" << endl;
+cin >> T_final;
+
+
+T_start = 2.2;
+T_step = 0.025;
+T_final = 2.4;
+
+// Declare a matrix which stores the expectation values
+mat values = zeros<mat>(5, 9);
+
+N_start = 40;
+N_step = 20;
+N_final = 100;
+
+
+// for (int N = N_start; N <= N_final; N += N_step){
+// ofile << "\n";
+// ofile << "\n";
+// ofile << "Nspin =  " << N;
+// ofile << "\n";
+
+#pragma omp parallel for
+// Start Monte Carlo sampling by looping over the selcted Temperatures
+for (int i = 0; i <= 8; i++){
+  vec ExpectationValue = zeros<mat>(5);
+
+  T = T_start + T_step*i;
+
+  // Start Monte Carlo computation and get expectation values
+  MetropolisSampling(40, MC, T, ExpectationValue, Nconfigs, false, Energies, counter);
+  //
+  //WriteResultstoFile2(ofile, N, MC, T, ExpectationValue, Nconfigs);
+  values.col(i) = ExpectationValue;
+}
+
+ofile << values;
+
+// }
+ofile.close();  // close output file
+
+*/
   return 0;
-
-
 
 }
