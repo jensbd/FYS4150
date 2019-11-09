@@ -18,8 +18,10 @@ using namespace arma;
 void InitializeLattice(int, mat &, double&, double&, bool);
 
 // The metropolis algorithm including the loop over Monte Carlo cycles
-void MetropolisSampling(int, int, double, vec &, int &, bool);
+void MetropolisSampling(int, int, double, vec &, int &, bool, vec &, vec &);
 // prints to file the results of the calculations
 void WriteResultstoFile(ofstream&, int, int, double, vec, int);
+
+void Writeprobabilities(ofstream&, vec, vec);
 
 #endif // ISING_H

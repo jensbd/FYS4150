@@ -1,5 +1,9 @@
 #include "Functions.h"
+#include "omp.h"
 
+
+// Declare the function
+void Probability(double Energy, vec &Energies, vec &counter);
 
 // inline function for PeriodicBoundary boundary conditions
 inline int PeriodicBoundary(int i, int limit, int add) {
@@ -8,7 +12,7 @@ inline int PeriodicBoundary(int i, int limit, int add) {
 
 
 // The Monte Carlo part with the Metropolis algo with sweeps over the lattice
-void MetropolisSampling(int NSpins, int MCcycles, double Temperature, vec &ExpectationValues, int &Nconfigs, bool randomconfig)
+void MetropolisSampling(int NSpins, int MCcycles, double Temperature, vec &ExpectationValues, int &Nconfigs, bool randomconfig, vec &Energies, vec &counter)
 {
 
   // Initialize the total number of accepted configurations
@@ -28,6 +32,7 @@ void MetropolisSampling(int NSpins, int MCcycles, double Temperature, vec &Expec
   vec EnergyDifference = zeros<mat>(17);
   for( int de =-8; de <= 8; de+=4) EnergyDifference(de+8) = exp(-de/Temperature);
   // Start Monte Carlo cycles
+  //#pragma omp parallel for
   for (int cycles = 1; cycles <= MCcycles; cycles++){
     // The sweep over the lattice, looping over all spin sites
     for(int x =0; x < NSpins; x++) {
@@ -52,6 +57,17 @@ void MetropolisSampling(int NSpins, int MCcycles, double Temperature, vec &Expec
     // Update energy and magnetisation
 	  MagneticMoment += (double) 2*SpinMatrix(ix,iy);
 	  Energy += (double) deltaE;
+
+    // Probability counting
+
+    for (int i = 0; i < 400; i++){
+      Energies(i) = -800 + 4*i;
+    }
+
+    if (MCcycles >= 2000){
+      Probability(Energy, Energies, counter);
+    }
+
 	}
       }
     }
@@ -136,4 +152,31 @@ void WriteResultstoFile(ofstream& ofile, int NSpins, int MCcycles, double temper
   ofile << setw(20) << setprecision(8) << Mvariance/temperature; // Susceptibility
   ofile << setw(20) << setprecision(8) << temperature;
   //ofile << setw(15) << setprecision(8) << Mabs_ExpectationValues/NSpins/NSpins << endl;
+} // end output function
+
+// Function for counting the energy states => probability analysis for 4d
+
+void Probability(double Energy, vec &Energies, vec &counter){
+  double tol = 1E-6;
+  for (int i = 0; i < 400; i++){
+    if (fabs(Energy - Energies(i)) <= tol){
+      counter(i) ++;
+    }
+  }
+}
+
+// Writing a file for the probability output
+
+void Writeprobabilities(ofstream& ofile, vec Energies, vec counter)
+{
+
+  ofile << setiosflags(ios::showpoint | ios::uppercase);
+  //ofile << "| Temperature | Energy-Mean | Magnetization-Mean|    Cv    | Susceptibility |\n";
+  //ofile << "\n";
+  for (int i = 0; i < 400; i++){
+    ofile << setw(10) << setprecision(8) << Energies(i); // All the energies
+    ofile << setw(15) << setprecision(8) << counter(i);
+    ofile << "\n";
+  }
+   // Probability distribution of the energy
 } // end output function

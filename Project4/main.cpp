@@ -21,7 +21,7 @@
 #include <random>
 #include <armadillo>
 #include <string>
-
+#include "omp.h"
 #include "Functions.h"
 using namespace  std;
 using namespace arma;
@@ -34,6 +34,7 @@ ofstream ofile;
 
 int main(int argc, char* argv[])
 {
+
   string filename;
   int NSpins, MCcycles;
   //double InitialTemp, FinalTemp, TempStep;
@@ -61,23 +62,29 @@ int main(int argc, char* argv[])
 
   int Nconfigs;
 
+  vec Energies = zeros<mat>(400);
+  vec counter = zeros<mat>(400);
+
+
   // Start Monte Carlo sampling by looping over the selcted Temperatures
   //for (double Temperature = InitialTemp; Temperature <= FinalTemp; Temperature+=TempStep){
   vec ExpectationValues = zeros<mat>(5);
   // Start Monte Carlo computation and get expectation values
-  MetropolisSampling(NSpins, MCcycles, Temp, ExpectationValues, Nconfigs, false);
+  //MetropolisSampling(NSpins, MCcycles, Temp, ExpectationValues, Nconfigs, false, Energies, counter);
 
-  WriteResultstoFile(ofile, NSpins, MCcycles, Temp, ExpectationValues, Nconfigs);
+  //WriteResultstoFile(ofile, NSpins, MCcycles, Temp, ExpectationValues, Nconfigs);
  // }
   ofile.close();  // close output file
 
 
+/*
 
+  cout << "Project Task 4c for ordered and unordered spin: " << endl;
+  //cout << "Declare new file name : " << endl;
+  //string file;
+  //cin >> file;
 
-  cout << "Project Task 4c for ordered spin: " << endl;
-  cout << "Declare new file name : " << endl;
-  string file;
-  cin >> file;
+  string file = "Ordered";
 
   ofile.open(file);
   //ofile << setiosflags(ios::showpoint | ios::uppercase);
@@ -88,15 +95,16 @@ int main(int argc, char* argv[])
   double T;
   cout << "Read in the number of spins" << endl;
   cin >> N;
-  cout << "Read in the number of Monte Carlo cycles in times of 100" << endl;
+  cout << "Read in the number of Monte Carlo cycles in times of 10" << endl;
   cin >> MC;
   cout << "Read in the given value for the Temperature" << endl;
   cin >> T;
 
   int iterations;
-  for (int i=1; i < MC; i++){
+  //#pragma omp parallel for
+  for (int i=1; i <= MC; i++){
     vec ExpectationValue = zeros<mat>(5);
-    iterations = 100*i;
+    iterations = 10*i;
     // Start Monte Carlo computation and get expectation values
     MetropolisSampling(N, iterations, T, ExpectationValue, Nconfigs, false);
     //
@@ -105,10 +113,12 @@ int main(int argc, char* argv[])
   ofile.close();  // close output file
 
 
-  cout << "Project Task 4c for unordered spin: " << endl;
-  cout << "Declare new file name : " << endl;
-  string file2;
-  cin >> file2;
+  //cout << "Project Task 4c for unordered spin: " << endl;
+  //cout << "Declare new file name : " << endl;
+  //string file2;
+  //cin >> file;
+
+  string file2 = "Unordered";
 
   ofile.open(file2);
   //ofile << setiosflags(ios::showpoint | ios::uppercase);
@@ -116,14 +126,53 @@ int main(int argc, char* argv[])
 
 
   int iterations2;
-  for (int i=1; i < MC; i++){
+  //#pragma omp parallel for
+  for (int i=1; i <= MC; i++){
     vec ExpectationValue2 = zeros<mat>(5);
-    iterations2 = 100*i;
+    iterations2 = 10*i;
     // Start Monte Carlo computation and get expectation values
     MetropolisSampling(N, iterations2, T, ExpectationValue2, Nconfigs, true);
     //
     WriteResultstoFile(ofile, N, iterations2, T, ExpectationValue2, Nconfigs);
   }
+  ofile.close();  // close output file
+
+*/
+
+
+
+  cout << "Project Task 4d for Probability: " << endl;
+  //cout << "Declare new file name : " << endl;
+  //string file;
+  //cin >> file;
+
+  string file = "Probability";
+
+  ofile.open(file);
+  //ofile << setiosflags(ios::showpoint | ios::uppercase);
+  ofile << "|   Energies | Energy counts |\n";
+  // Start Monte Carlo sampling by looping over the selcted Temperatures
+  int N;
+  long int MC;
+  double T;
+  cout << "Read in the number of spins" << endl;
+  cin >> N;
+  cout << "Read in the number of Monte Carlo cycles in times of 10" << endl;
+  cin >> MC;
+  cout << "Read in the given value for the Temperature" << endl;
+  cin >> T;
+
+  int iterations;
+  //#pragma omp parallel for
+  for (int i=1; i <= MC; i++){
+    vec ExpectationValue = zeros<mat>(5);
+    iterations = 10*i;
+    // Start Monte Carlo computation and get expectation values
+    MetropolisSampling(N, iterations, T, ExpectationValue, Nconfigs, false, Energies, counter);
+    //
+
+  }
+  Writeprobabilities(ofile, Energies, counter);
   ofile.close();  // close output file
 
   return 0;
