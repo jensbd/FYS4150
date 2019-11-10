@@ -134,7 +134,7 @@ void InitializeLattice(int NSpins, mat &SpinMatrix,  double& Energy, double& Mag
 }// end function initialise
 
 
-void WriteResultstoFile(ofstream& ofile, int NSpins, int MCcycles, double temperature, vec ExpectationValues, int Nconfigs)
+void WriteResultstoFile(ofstream& ofile, int NSpins, int MCcycles, double temperature, vec ExpectationValues, int Nconfigs, bool randomconfig)
 {
   double norm = 1.0/((double) (MCcycles));  // divided by  number of cycles
   double E_ExpectationValues = ExpectationValues(0)*norm;
@@ -149,15 +149,49 @@ void WriteResultstoFile(ofstream& ofile, int NSpins, int MCcycles, double temper
   double Mvariance = (M2_ExpectationValues - Mabs_ExpectationValues*Mabs_ExpectationValues)/NSpins/NSpins;
   ofile << setiosflags(ios::showpoint | ios::uppercase);
   //ofile << "| Temperature | Energy-Mean | Magnetization-Mean|    Cv    | Susceptibility |\n";
+
+
+
+
   ofile << "\n";
   ofile << setw(20) << setprecision(8) << MCcycles; // # Monte Carlo cycles (sweeps per lattice)
   ofile << setw(20) << setprecision(8) << E_ExpectationValues/NSpins/NSpins; // Mean energy
   ofile << setw(20) << setprecision(8) << Mabs_ExpectationValues/NSpins/NSpins; // Mean magetization
-  ofile << setw(20) << setprecision(8) << Nconfigs; // # accepted configurations
+  ofile << setw(20) << setprecision(8) << Nconfigs*norm/NSpins/NSpins; // # accepted configurations
   ofile << setw(20) << setprecision(8) << Evariance/temperature/temperature; // Specific heat Cv
   ofile << setw(20) << setprecision(8) << Mvariance/temperature; // Susceptibility
   ofile << setw(20) << setprecision(8) << temperature;
-  //ofile << setw(15) << setprecision(8) << Mabs_ExpectationValues/NSpins/NSpins << endl;
+
+} // end output function
+
+
+void WriteResultsto4b(ofstream& ofile, int NSpins, int MCcycles, double temperature, vec ExpectationValues, int Nconfigs)
+{
+  double norm = 1.0/((double) (MCcycles));  // divided by  number of cycles
+  double E_ExpectationValues = ExpectationValues(0)*norm;
+  double E2_ExpectationValues = ExpectationValues(1)*norm;
+  double M_ExpectationValues = ExpectationValues(2)*norm;
+  double M2_ExpectationValues = ExpectationValues(3)*norm;
+  double Mabs_ExpectationValues = ExpectationValues(4)*norm;
+
+
+  // all expectation values are per spin, divide by 1/NSpins/NSpins
+  double Evariance = (E2_ExpectationValues- E_ExpectationValues*E_ExpectationValues)/NSpins/NSpins; // Energy Variance
+  double Mvariance = (M2_ExpectationValues - Mabs_ExpectationValues*Mabs_ExpectationValues)/NSpins/NSpins; // Magnetization Variance
+
+  double Estd = sqrt(Evariance);
+  double Mstd = sqrt(Mvariance);
+
+  ofile << setiosflags(ios::showpoint | ios::uppercase);
+  //ofile << "| Temperature | Energy-Mean | Magnetization-Mean|    Cv    | Susceptibility |\n";
+  ofile << "\n";
+  ofile << setw(20) << setprecision(8) << MCcycles; // # Monte Carlo cycles (sweeps per lattice)
+  ofile << setw(20) << setprecision(8) << E_ExpectationValues/NSpins/NSpins; // Mean energy
+  ofile << setw(20) << setprecision(8) << Mabs_ExpectationValues/NSpins/NSpins; // Mean magetization
+  ofile << setw(20) << setprecision(8) << Evariance/temperature/temperature; // Specific heat Cv
+  ofile << setw(15) << setprecision(8) << Mvariance/temperature; // Susceptibility
+  ofile << setw(15) << setprecision(8) << Estd/NSpins/NSpins; // Standard deviation
+  ofile << setw(15) << setprecision(8) << Mstd/NSpins/NSpins; // Standard deviation
 } // end output function
 
 
@@ -226,3 +260,41 @@ void Writeprobabilities(ofstream& ofile, vec Energies, vec counter, int NSpins, 
 
    // Probability distribution of the energy
 } // end output function
+
+
+
+// Write the results to the output file (expectation values)
+void WriteT(ofstream& ofile, mat L, int NSpins, int MCcycles, vec T)
+{
+
+  // Divide by  number of Monte Carlo cycles
+  double norm = 1.0/((double) (MCcycles));
+  // Divide by number of spins
+  double Norm = 1.0/(NSpins*NSpins);
+
+  // Loop over temperature
+  for (int i = 0; i < L.n_rows; i++){
+
+    double E_ExpectationValues = L(i,0)*norm;
+    double E2_ExpectationValues = L(i,1)*norm;
+    double M_ExpectationValues = L(i,2)*norm;
+    double M2_ExpectationValues = L(i,3)*norm;
+    double Mabs_ExpectationValues = L(i,4)*norm;
+
+    // all expectation values are per spin, divide by 1/NSpins/NSpins
+    double Evariance = (E2_ExpectationValues- E_ExpectationValues*E_ExpectationValues)/NSpins/NSpins;
+    double Mvariance = (M2_ExpectationValues - Mabs_ExpectationValues*Mabs_ExpectationValues)/NSpins/NSpins;
+
+    double Cv = Evariance/(T(i)*T(i));
+    double Suscp = Mvariance/T(i);
+
+    // Write to file
+    ofile << setw(16) << setprecision(8) << T(i);
+    ofile << setw(16) << setprecision(8) << E_ExpectationValues/NSpins/NSpins;
+    ofile << setw(16) << setprecision(8) << Mabs_ExpectationValues/NSpins/NSpins;
+    ofile << setw(16) << setprecision(8) << Cv;
+    ofile << setw(16) << setprecision(8) << Suscp;
+    ofile << "\n";
+  }
+
+}

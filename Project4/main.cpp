@@ -32,57 +32,83 @@ ofstream ofile;
 
 // Main program begins here
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
 
-  string filename;
-  int NSpins, MCcycles;
-  //double InitialTemp, FinalTemp, TempStep;
-  double Temp;
-  if (argc <= 3) {
-    cout << "Bad Usage: " << argv[0] <<
-      " read output file, Number of spins, MC cycles and temperature" << endl;
-    exit(1);
-  }
-  if (argc > 1) {
-    filename=argv[1];
-    NSpins = atoi(argv[2]);
-    MCcycles = atoi(argv[3]);
-    Temp = atof(argv[4]);
-    //FinalTemp = atof(argv[5]);
-    //TempStep = atof(argv[6]);
-  }
-  // Declare new file name and add lattice size to file name
-  string fileout = filename;
-  string argument = to_string(NSpins);
-  fileout.append(argument);
-  ofile.open(fileout);
+cout << "\n" << "Which Project Task do you want to run?: " << endl;
+cout << "\n" << "Project Task a & b: " <<  "Write b " << endl;
+cout << "\n" << "Project Task c: " <<  "Write c " << endl;
+cout << "\n" << "Project Task d: " <<  "Write d " << endl;
+cout << "\n" << "Project Task e: " <<  "Write e " << endl;
 
-  ofile << "|   # Monte Carlo cycles  | Energy-Mean | Magnetization-Mean | # Accepted configurations |  Specific heat  | Susceptibility | Temperature |\n";
 
-  int Nconfigs;
+cout << "\n" << "Write here " << endl;
+string Task;
+cin >> Task;
 
-  vec Energies = zeros<mat>(400);
-  vec counter = zeros<mat>(400);
+if (Task == "b"){
+
+
+// Analytical results for 2x2 lattice
+
+double Z = 2*(exp(8) + exp(-8) + 6);
+double E = 16*(exp(-8) - exp(8))/(Z);
+double Mabs = 8*(exp(8) + 2)/(Z);
+double Cv = 4*64*(4 + 6*exp(8) + 6*exp(-8))/(Z*Z);
+double Xi = (32.0/(Z))*( (exp(8) + 1) - (2.0/(Z))* pow((exp(8) + 2),2) );
+
+cout << "\n" << "Analytical values for all the expectation values \n";
+cout << "Energy Mean per spin = " << E/4 << "\n";
+cout << "Absolute Magnetization Mean per spin = " << Mabs/4 << "\n";
+cout << "Specific heat per spin = " << Cv/4 << "\n";
+cout << "Susceptibility per spin = " << Xi/4 << "\n";
+
+
+cout << "\n" << "Project Task 4b: \n" << endl;
+
+string file = "Lattice_2X2";
+ofile.open(file);
+
+ofile << "|   # Monte Carlo cycles  | Energy-Mean | Magnetization-Mean |  Specific heat  | Susceptibility | Energy-STD | Magnetization-STD |\n";
+
+int NSpins;
+int Nconfigs;
+NSpins = 2;
+long int MCcycles;
+double Temp = 1.0;
+
+cout << "Read in the number of Monte Carlo cycles" << endl;
+cin >> MCcycles;
+
+
+
+vec Energies = zeros<mat>(400);
+vec counter = zeros<mat>(400);
 
 
   // Start Monte Carlo sampling by looping over the selcted Temperatures
   //for (double Temperature = InitialTemp; Temperature <= FinalTemp; Temperature+=TempStep){
+
+  for (int i = 10; i <= MCcycles; i *= 10){
+
   vec ExpectationValues = zeros<mat>(5);
   // Start Monte Carlo computation and get expectation values
-  //MetropolisSampling(NSpins, MCcycles, Temp, ExpectationValues, Nconfigs, false, Energies, counter);
+  MetropolisSampling(NSpins, i, Temp, ExpectationValues, Nconfigs, false, Energies, counter);
 
-  //WriteResultstoFile(ofile, NSpins, MCcycles, Temp, ExpectationValues, Nconfigs);
+  WriteResultsto4b(ofile, NSpins, i, Temp, ExpectationValues, Nconfigs);
+  }
  // }
   ofile.close();  // close output file
+}
 
 
-/*
+// Task 4c
 
-  cout << "Project Task 4c for ordered and unordered spin: " << endl;
-  //cout << "Declare new file name : " << endl;
-  //string file;
-  //cin >> file;
+if (Task == "c"){
+
+  cout << "\n" << "Project Task 4c for ordered and unordered with spin L = 20: " << endl;
+
+  vec Energies = zeros<mat>(400);
+  vec counter = zeros<mat>(400);
 
   string file = "Ordered";
 
@@ -90,33 +116,27 @@ int main(int argc, char* argv[])
   //ofile << setiosflags(ios::showpoint | ios::uppercase);
   ofile << "|   # Monte Carlo cycles  | Energy-Mean | Magnetization-Mean | # Accepted configurations |  Specific heat  | Susceptibility | Temperature |\n";
   // Start Monte Carlo sampling by looping over the selcted Temperatures
-  int N;
+  int N = 20;
+  int Nconfigs;
   long int MC;
   double T;
-  cout << "Read in the number of spins" << endl;
-  cin >> N;
   cout << "Read in the number of Monte Carlo cycles in times of 10" << endl;
   cin >> MC;
   cout << "Read in the given value for the Temperature" << endl;
   cin >> T;
 
-  int iterations;
+
   //#pragma omp parallel for
-  for (int i=1; i <= MC; i++){
+  for (int i=1; i <= MC; i += 1000){
     vec ExpectationValue = zeros<mat>(5);
-    iterations = 10*i;
+
     // Start Monte Carlo computation and get expectation values
-    MetropolisSampling(N, iterations, T, ExpectationValue, Nconfigs, false);
+    MetropolisSampling(N, i, T, ExpectationValue, Nconfigs, false, Energies, counter);
     //
-    WriteResultstoFile(ofile, N, iterations, T, ExpectationValue, Nconfigs);
+    WriteResultstoFile(ofile, N, i, T, ExpectationValue, Nconfigs, false);
   }
   ofile.close();  // close output file
 
-
-  //cout << "Project Task 4c for unordered spin: " << endl;
-  //cout << "Declare new file name : " << endl;
-  //string file2;
-  //cin >> file;
 
   string file2 = "Unordered";
 
@@ -125,38 +145,38 @@ int main(int argc, char* argv[])
   ofile << "| # Monte Carlo cycles  |  Energy-Mean   |  Magnetization-Mean  |  # Accepted configurations  |  Specific heat  |  Susceptibility   |  Temperature |\n";
 
 
-  int iterations2;
+
   //#pragma omp parallel for
-  for (int i=1; i <= MC; i++){
+  for (int i=1; i <= MC; i += 1000){
     vec ExpectationValue2 = zeros<mat>(5);
-    iterations2 = 10*i;
+
     // Start Monte Carlo computation and get expectation values
-    MetropolisSampling(N, iterations2, T, ExpectationValue2, Nconfigs, true);
+    MetropolisSampling(N, i, T, ExpectationValue2, Nconfigs, true, Energies, counter);
     //
-    WriteResultstoFile(ofile, N, iterations2, T, ExpectationValue2, Nconfigs);
+    WriteResultstoFile(ofile, N, i, T, ExpectationValue2, Nconfigs, true);
   }
   ofile.close();  // close output file
+}
 
-*/
+// Task 4d
 
+if (Task == "d"){
 
-/*
-  cout << "Project Task 4d for Probability: " << endl;
-  //cout << "Declare new file name : " << endl;
-  //string file;
-  //cin >> file;
+  cout << "\n" << "Project Task 4d for Probability, with spin L = 20:: " << endl;
+
+  vec Energies = zeros<mat>(400);
+  vec counter = zeros<mat>(400);
 
   string file = "Probability";
 
   ofile.open(file);
-  //ofile << setiosflags(ios::showpoint | ios::uppercase);
+
   ofile << "|  Energies | Energy counts |\n";
   // Start Monte Carlo sampling by looping over the selcted Temperatures
-  int N;
+  int N = 20;
+  int Nconfigs;
   long int MC;
   double T;
-  cout << "Read in the number of spins" << endl;
-  cin >> N;
   cout << "Read in the number of Monte Carlo cycles in times of 10" << endl;
   cin >> MC;
   cout << "Read in the given value for the Temperature" << endl;
@@ -176,10 +196,16 @@ int main(int argc, char* argv[])
 
   }
   ofile.close();  // close output file
-*/
+}
 
-/*
+// Task 4c
+
+if (Task == "e"){
+
 cout << "Project Task 4e: " << endl;
+
+vec Energies = zeros<mat>(400);
+vec counter = zeros<mat>(400);
 
 string file = "Temperature";
 
@@ -188,6 +214,7 @@ ofile << "| Temperature | Energy-Mean | Magnetization-Mean |  Specific heat  | S
 
 // Start Monte Carlo sampling by looping over the selcted Temperatures
 int N_start, N_step, N_final;
+int Nconfigs;
 long int MC;
 double T_start, T_step, T_final, T;
 
@@ -209,40 +236,78 @@ T_start = 2.2;
 T_step = 0.025;
 T_final = 2.4;
 
-// Declare a matrix which stores the expectation values
-mat values = zeros<mat>(5, 9);
+// Declare a matrix which stores the expectation values for spins 40, 60, 80, 100
+mat L_40 = zeros<mat>(9, 5);
+mat L_60 = zeros<mat>(9, 5);
+mat L_80 = zeros<mat>(9, 5);
+mat L_100 = zeros<mat>(9, 5);
 
 N_start = 40;
 N_step = 20;
 N_final = 100;
 
+// Time the loop
+double start = omp_get_wtime();
+vec Tvalues = zeros<mat>(9);
+//#pragma omp parallel for ordered schedule(static)
+for (int N = N_start; N <= N_final; N += N_step){
+//#pragma omp ordered
 
-// for (int N = N_start; N <= N_final; N += N_step){
-// ofile << "\n";
-// ofile << "\n";
-// ofile << "Nspin =  " << N;
-// ofile << "\n";
+//ofile << "\n";
+//ofile << "\n";
+//ofile << "Nspin =  " << N;
+//ofile << "\n";
 
+//#pragma omp ordered
 #pragma omp parallel for
 // Start Monte Carlo sampling by looping over the selcted Temperatures
 for (int i = 0; i <= 8; i++){
   vec ExpectationValue = zeros<mat>(5);
 
-  T = T_start + T_step*i;
 
+  T = T_start + T_step*i;
+  Tvalues(i) = T;
   // Start Monte Carlo computation and get expectation values
-  MetropolisSampling(40, MC, T, ExpectationValue, Nconfigs, false, Energies, counter);
+  MetropolisSampling(N, MC, T, ExpectationValue, Nconfigs, false, Energies, counter);
   //
+
+  if (N == 40){
+    L_40.row(i) = ExpectationValue.t();
+  }
+
+  else if (N == 60){
+    L_60.row(i) = ExpectationValue.t();
+  }
+
+  else if (N == 80){
+    L_80.row(i) = ExpectationValue.t();
+  }
+
+  else{
+    L_100.row(i) = ExpectationValue.t();
+  }
+
+//#pragma omp ordered
   //WriteResultstoFile2(ofile, N, MC, T, ExpectationValue, Nconfigs);
-  values.col(i) = ExpectationValue;
 }
 
-ofile << values;
+}
 
-// }
+WriteT(ofile, L_40, 40, MC, Tvalues);
+ofile <<"\n";
+WriteT(ofile, L_60, 60, MC, Tvalues);
+ofile <<"\n";
+WriteT(ofile, L_80, 80, MC, Tvalues);
+ofile <<"\n";
+WriteT(ofile, L_100, 100, MC, Tvalues);
 ofile.close();  // close output file
 
-*/
+double finish = omp_get_wtime();
+double time_used = finish - start;
+cout << "Time used [s]: " << time_used << endl;
+
+}
+
   return 0;
 
 }
