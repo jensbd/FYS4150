@@ -22,7 +22,7 @@ void MetropolisSampling(int, int, double, vec &, int &, bool, vec &, vec &);
 // prints to file the results of the calculations
 void WriteResultstoFile(ofstream&, int, int, double, vec, int);
 // Task 4d
-void Writeprobabilities(ofstream&, vec, vec);
+void Writeprobabilities(ofstream&, vec, vec, int, int, vec);
 // Task 4e
 void WriteResultstoFile2(ofstream&, int, int, double, vec, int);
 

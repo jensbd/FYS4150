@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 */
 
 
-
+/*
   cout << "Project Task 4d for Probability: " << endl;
   //cout << "Declare new file name : " << endl;
   //string file;
@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
 
   ofile.open(file);
   //ofile << setiosflags(ios::showpoint | ios::uppercase);
-  ofile << "|   Energies | Energy counts |\n";
+  ofile << "|  Energies | Energy counts |\n";
   // Start Monte Carlo sampling by looping over the selcted Temperatures
   int N;
   long int MC;
@@ -169,12 +169,14 @@ int main(int argc, char* argv[])
     iterations = 10*i;
     // Start Monte Carlo computation and get expectation values
     MetropolisSampling(N, iterations, T, ExpectationValue, Nconfigs, false, Energies, counter);
-    //
+
+    if (i == MC){
+    Writeprobabilities(ofile, Energies, counter, N, iterations, ExpectationValue);
+  }
 
   }
-  Writeprobabilities(ofile, Energies, counter);
   ofile.close();  // close output file
-
+*/
 
 /*
 cout << "Project Task 4e: " << endl;

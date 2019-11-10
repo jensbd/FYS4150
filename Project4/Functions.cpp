@@ -59,10 +59,6 @@ void MetropolisSampling(int NSpins, int MCcycles, double Temperature, vec &Expec
 	  Energy += (double) deltaE;
 
 
-
-
-
-
       }
     }
 	}
@@ -76,7 +72,7 @@ void MetropolisSampling(int NSpins, int MCcycles, double Temperature, vec &Expec
     Energies(i) = -800 + 4*i;
   }
 
-  if (MCcycles >= 1000){
+  if (MCcycles >= 1000){ // Hard coded the equilibrium state
     Probability(Energy, Energies, counter);
   }
 
@@ -203,8 +199,13 @@ void Probability(double Energy, vec &Energies, vec &counter){
 
 // Writing a file for the probability output
 
-void Writeprobabilities(ofstream& ofile, vec Energies, vec counter)
+void Writeprobabilities(ofstream& ofile, vec Energies, vec counter, int NSpins, int MCcycles, vec ExpectationValues)
 {
+  double norm = 1.0/((double) (MCcycles));  // divided by  number of cycles
+  double E_ExpectationValues = ExpectationValues(0)*norm;
+  double E2_ExpectationValues = ExpectationValues(1)*norm;
+
+  double Evariance = (E2_ExpectationValues- E_ExpectationValues*E_ExpectationValues);
 
   ofile << setiosflags(ios::showpoint | ios::uppercase);
   //ofile << "| Temperature | Energy-Mean | Magnetization-Mean|    Cv    | Susceptibility |\n";
@@ -214,5 +215,14 @@ void Writeprobabilities(ofstream& ofile, vec Energies, vec counter)
     ofile << setw(15) << setprecision(8) << counter(i);
     ofile << "\n";
   }
+  ofile << "\n";
+  ofile << "Variance \n";
+  ofile << setw(20) << setprecision(8) << Evariance; // Variance
+
+  ofile << "\n";
+  ofile << "Expectationvalue of the Energy \n";
+  ofile << setw(20) << setprecision(8) << E_ExpectationValues; // Mean energy
+
+
    // Probability distribution of the energy
 } // end output function
