@@ -63,9 +63,7 @@ void MetropolisSampling(int NSpins, int MCcycles, double Temperature, vec &Expec
     }
 	}
 
-  if (fabs(Energy + 796) < 1E-6){
-    cout << "Hurra \n";
-  }
+
   // Probability counting
 
   for (int i = 0; i < 400; i++){
@@ -196,6 +194,17 @@ void WriteResultsto4b(ofstream& ofile, int NSpins, int MCcycles, double temperat
 
 
 
+void WriteConfigvsT(ofstream& ofile, int NSpins, int MCcycles, double temperature, int Nconfigs)
+{
+  double norm = 1.0/((double) (MCcycles));
+
+  ofile << "\n";
+  ofile << setw(20) << setprecision(8) << temperature;
+  ofile << setw(20) << setprecision(8) << Nconfigs*norm/NSpins/NSpins; // # accepted configurations
+
+} // end output function
+
+
 void WriteResultstoFile2(ofstream& ofile, int NSpins, int MCcycles, double temperature, vec ExpectationValues, int Nconfigs)
 {
   double norm = 1.0/((double) (MCcycles));  // divided by  number of cycles
@@ -249,16 +258,12 @@ void Writeprobabilities(ofstream& ofile, vec Energies, vec counter, int NSpins, 
     ofile << setw(15) << setprecision(8) << counter(i);
     ofile << "\n";
   }
-  ofile << "\n";
-  ofile << "Variance \n";
-  ofile << setw(20) << setprecision(8) << Evariance; // Variance
+  cout << "\n";
+  cout << "Expectationvalue of the Energy = " << E_ExpectationValues << "\n"; // Mean Energy
+  cout << "Variance of the Energy = " << Evariance << "\n"; // Variance
+  cout << "Standard deviation of the Energy = " << sqrt(Evariance) << "\n"; // Standard Deviation
 
-  ofile << "\n";
-  ofile << "Expectationvalue of the Energy \n";
-  ofile << setw(20) << setprecision(8) << E_ExpectationValues; // Mean energy
-
-
-   // Probability distribution of the energy
+ // Probability distribution of the energy
 } // end output function
 
 

@@ -120,14 +120,14 @@ if (Task == "c"){
   int Nconfigs;
   long int MC;
   double T;
-  cout << "Read in the number of Monte Carlo cycles in times of 10" << endl;
+  cout << "Read in the number of Monte Carlo cycles" << endl;
   cin >> MC;
   cout << "Read in the given value for the Temperature" << endl;
   cin >> T;
 
 
   //#pragma omp parallel for
-  for (int i=1; i <= MC; i += 1000){
+  for (int i=1; i <= MC; i += 100){
     vec ExpectationValue = zeros<mat>(5);
 
     // Start Monte Carlo computation and get expectation values
@@ -147,7 +147,7 @@ if (Task == "c"){
 
 
   //#pragma omp parallel for
-  for (int i=1; i <= MC; i += 1000){
+  for (int i=1; i <= MC; i += 100){
     vec ExpectationValue2 = zeros<mat>(5);
 
     // Start Monte Carlo computation and get expectation values
@@ -156,31 +156,52 @@ if (Task == "c"){
     WriteResultstoFile(ofile, N, i, T, ExpectationValue2, Nconfigs, true);
   }
   ofile.close();  // close output file
+
+  // # Accepted configurations as a function of the Temperature
+
+  string file3 = "Nconfig_vs_Temp";
+
+  ofile.open(file3);
+  //ofile << setiosflags(ios::showpoint | ios::uppercase);
+  ofile << "|  # Accepted configurations |  Temperature |\n";
+
+  double InitialTemp = 1.0;
+  double FinalTemp = 2.4;
+  double TempStep = 0.2;
+
+  for (double Temp = InitialTemp; Temp <= FinalTemp; Temp+=TempStep){
+    vec ExpectationValue = zeros<mat>(5);
+
+    // Start Monte Carlo computation and get expectation values
+    MetropolisSampling(N, 1000, Temp, ExpectationValue, Nconfigs, true, Energies, counter);
+
+    WriteConfigvsT(ofile, N, 1000, Temp, Nconfigs);
+   }
+   ofile.close();  // close output file
 }
 
 // Task 4d
 
 if (Task == "d"){
 
-  cout << "\n" << "Project Task 4d for Probability, with spin L = 20:: " << endl;
+  cout << "\n" << "Project Task 4d for Probability, with spin L = 20 and T = 1.0: " << endl;
 
   vec Energies = zeros<mat>(400);
   vec counter = zeros<mat>(400);
 
-  string file = "Probability";
+  string file = "Probability_1";
 
   ofile.open(file);
 
   ofile << "|  Energies | Energy counts |\n";
   // Start Monte Carlo sampling by looping over the selcted Temperatures
   int N = 20;
-  int Nconfigs;
+  int Nconfigs; // # Accepted of configurations
+  double T = 1.0; // Temperature
+
   long int MC;
-  double T;
   cout << "Read in the number of Monte Carlo cycles in times of 10" << endl;
   cin >> MC;
-  cout << "Read in the given value for the Temperature" << endl;
-  cin >> T;
 
   int iterations;
   //#pragma omp parallel for
@@ -196,6 +217,34 @@ if (Task == "d"){
 
   }
   ofile.close();  // close output file
+
+  cout << "\n" << "Project Task 4d for Probability, with spin L = 20 and T = 2.4: " << endl;
+
+  string file2 = "Probability_24";
+
+  vec Energies2 = zeros<mat>(400);
+  vec counter2 = zeros<mat>(400);
+
+  T = 2.4; // Temperature
+  ofile.open(file2);
+
+  ofile << "|  Energies | Energy counts |\n";
+  // Start Monte Carlo sampling by looping over the selcted Temperatures
+
+  //#pragma omp parallel for
+  for (int i=1; i <= MC; i++){
+    vec ExpectationValue = zeros<mat>(5);
+    iterations = 10*i;
+    // Start Monte Carlo computation and get expectation values
+    MetropolisSampling(N, iterations, T, ExpectationValue, Nconfigs, false, Energies2, counter2);
+
+    if (i == MC){
+    Writeprobabilities(ofile, Energies2, counter2, N, iterations, ExpectationValue);
+  }
+
+}
+ofile.close();  // close output file
+
 }
 
 // Task 4c
@@ -223,14 +272,14 @@ double T_start, T_step, T_final, T;
 cout << "Read in the number of Monte Carlo cycles" << endl;
 cin >> MC;
 
-
+/*
 cout << "Read in the initial value for the Temperature" << endl;
 cin >> T_start;
 cout << "Read in the step size for the Temperature" << endl;
 cin >> T_step;
 cout << "Read in the final value for the Temperature" << endl;
 cin >> T_final;
-
+*/
 
 T_start = 2.2;
 T_step = 0.025;
@@ -249,16 +298,11 @@ N_final = 100;
 // Time the loop
 double start = omp_get_wtime();
 vec Tvalues = zeros<mat>(9);
-//#pragma omp parallel for ordered schedule(static)
+
 for (int N = N_start; N <= N_final; N += N_step){
-//#pragma omp ordered
 
-//ofile << "\n";
-//ofile << "\n";
-//ofile << "Nspin =  " << N;
-//ofile << "\n";
 
-//#pragma omp ordered
+
 #pragma omp parallel for
 // Start Monte Carlo sampling by looping over the selcted Temperatures
 for (int i = 0; i <= 8; i++){
@@ -292,6 +336,9 @@ for (int i = 0; i <= 8; i++){
 }
 
 }
+double finish = omp_get_wtime();
+double time_used = finish - start;
+cout << "Time used [s]: " << time_used << endl;
 
 WriteT(ofile, L_40, 40, MC, Tvalues);
 ofile <<"\n";
@@ -302,9 +349,8 @@ ofile <<"\n";
 WriteT(ofile, L_100, 100, MC, Tvalues);
 ofile.close();  // close output file
 
-double finish = omp_get_wtime();
-double time_used = finish - start;
-cout << "Time used [s]: " << time_used << endl;
+
+
 
 }
 

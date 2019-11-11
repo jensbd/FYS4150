@@ -43,7 +43,7 @@ if Task == "c":
             plt.plot(MCcycles, energy_mean, "")
             #plt.axis([0, 5000,-2.1,-1.8])
             plt.xlabel("# of Monte Carlo cycles")
-            plt.ylabel("Energy expectation value")
+            plt.ylabel("Energy expectation value $$\langle$$ E $$\rangle$$")
 
             plt.figure(),
             plt.plot(MCcycles, mag_mean, "")
@@ -77,9 +77,8 @@ Probabilities
 """
 
 if Task == "d":
-    #filenames = ["Probability1","Probability24"]
-    filenames = ["Probability"]
-    #filenames = ["Probability24"]
+    filenames = ["Probability_1","Probability_24"]
+
 
     for i in filenames:
         with open(i) as file:
@@ -98,8 +97,8 @@ if Task == "d":
             if count > max_count:
                 max_count = count
                 most_probable_energy = energy
-        plt.bar(Energies,counts,width = 4 if i == "Probability" else 3)
-        plt.xlim(-805,-770) if i == "Probability" else plt.xlim(-705,-305)
+        plt.bar(Energies,counts,width = 4 if i == "Probability_1" else 3)
+        plt.xlim(-805,-770) if i == "Probability_1" else plt.xlim(-705,-305)
         plt.xlabel("Energy")
         plt.ylabel("Energy counts")
         props = dict(boxstyle='round', facecolor='wheat', alpha=1)

@@ -24,7 +24,11 @@ void MetropolisSampling(int, int, double, vec &, int &, bool, vec &, vec &);
 // Task 4b
 void WriteResultsto4b(ofstream&, int, int, double, vec, int);
 
+// Task 4c
 void WriteResultstoFile(ofstream&, int, int, double, vec, int, bool);
+
+void WriteConfigvsT(ofstream&, int, int, double, int);
+
 // Task 4d
 void Writeprobabilities(ofstream&, vec, vec, int, int, vec);
 // Task 4e
