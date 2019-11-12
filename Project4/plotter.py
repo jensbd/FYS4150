@@ -14,61 +14,112 @@ Equilibrium
 """
 
 if Task == "c":
-    filenames = ["Ordered","Unordered"]
+    filenames = ["Ordered1","Ordered"]
+    filenames2 = ["Unordered1", "Unordered"]
 
+    MCcycles = []
+    energyO = []
+    energyO2 = []
+    energyU = []
+    energyU2 = []
+    magO = []
+    magO2 = []
+    magU = []
+    magU2 = []
+    NconfigsU = []
+    NconfigsU2 = []
     for i in (filenames):
         with open(i) as file:
             lines = file.readlines()
-
-            MCcycles = []
-            energy_mean = []
-            mag_mean = []
-            Nconfigs = []
-            Cv = []
-            susceptibility = []
-            temperature = []
             #Skip the first two lines
             for j in range(2,len(lines)):
                 line = lines[j]
                 pieces = line.split()
-                MCcycles.append(float(pieces[0]))
-                energy_mean.append(float(pieces[1]))
-                mag_mean.append(float(pieces[2]))
-                Nconfigs.append(float(pieces[3]))
-                Cv.append(float(pieces[4]))
-                susceptibility.append(float(pieces[5]))
-                temperature.append(float(pieces[6]))
+                if i == "Ordered1":
+                    MCcycles.append(float(pieces[0]))
+                    energyO.append(float(pieces[1]))
+                    magO.append(float(pieces[2]))
+                else:
+                    energyO2.append(float(pieces[1]))
+                    magO2.append(float(pieces[2]))
 
-            plt.figure()
-            plt.plot(MCcycles, energy_mean, "")
-            #plt.axis([0, 5000,-2.1,-1.8])
-            plt.xlabel("# of Monte Carlo cycles")
-            plt.ylabel("Energy expectation value $$\langle$$ E $$\rangle$$")
+    for i in (filenames2):
+        with open(i) as file:
+            lines = file.readlines()
+            #Skip the first two lines
+            for j in range(2,len(lines)):
+                line = lines[j]
+                pieces = line.split()
+                if i == "Unordered1":
+                    energyU.append(float(pieces[1]))
+                    magU.append(float(pieces[2]))
+                    NconfigsU.append(float(pieces[3]))
 
-            plt.figure(),
-            plt.plot(MCcycles, mag_mean, "")
-            #plt.axis([0, 5000,-2.1,-1.8])
-            plt.xlabel("# of Monte Carlo cycles")
-            plt.ylabel("Magnetization expectation value")
+                else:
+                    energyU2.append(float(pieces[1]))
+                    magU2.append(float(pieces[2]))
+                    NconfigsU2.append(float(pieces[3]))
+print(len(energyU))
+plt.figure()
+plt.title("Ordered")
+plt.plot(MCcycles, energyO)
+plt.plot(MCcycles,energyO2)
+#plt.axis([0, 5000,-2.1,-1.8])
+plt.legend(["T = 1.0","T = 2.4"])
+plt.xlabel("# of Monte Carlo cycles")
+plt.ylabel("Energy expectation value $\langle$E$\\rangle$")
 
-            plt.figure()
-            plt.plot(MCcycles, Nconfigs, "")
-            #plt.axis([0, 5000,-2.1,-1.8])
-            plt.xlabel("# of Monte Carlo cycles")
-            plt.ylabel("Accepted configurations (normalized)")
+plt.figure()
+plt.title("Unordered")
+plt.plot(MCcycles, energyU)
+plt.plot(MCcycles,energyU2)
+#plt.axis([0, 5000,-2.1,-1.8])
+plt.legend(["T = 1.0","T = 2.4"])
+plt.xlabel("# of Monte Carlo cycles")
+plt.ylabel("Energy expectation value $\langle$E$\\rangle$")
 
-            plt.figure()
-            plt.plot(MCcycles, Cv, "")
-            #plt.axis([0, 5000,-2.1,-1.8])
-            plt.xlabel("# of Monte Carlo cycles")
-            plt.ylabel("Specific heat")
+plt.figure()
+plt.title("Ordered")
+plt.plot(MCcycles, magO, "")
+plt.plot(MCcycles, magO2, "")
+#plt.axis([0, 5000,-2.1,-1.8])
+plt.legend(["T = 1.0","T = 2.4"])
+plt.xlabel("# of Monte Carlo cycles")
+plt.ylabel("Magnetization expectation value $\langle$M$\\rangle$")
 
-            plt.figure()
-            plt.plot(MCcycles, susceptibility, "")
-            #plt.axis([0, 5000,-2.1,-1.8])
-            plt.xlabel("# of Monte Carlo cycles")
-            plt.ylabel("Susceptibility")
-            plt.show()
+plt.figure()
+plt.title("Unordered")
+plt.plot(MCcycles, magU, "")
+plt.plot(MCcycles, magU2, "")
+#plt.axis([0, 5000,-2.1,-1.8])
+plt.legend(["T = 1.0","T = 2.4"])
+plt.xlabel("# of Monte Carlo cycles")
+plt.ylabel("Magnetization expectation value $\langle$M$\\rangle$")
+
+plt.figure()
+plt.title("Unordered")
+plt.plot(MCcycles, NconfigsU, "")
+plt.plot(MCcycles, NconfigsU2, "")
+#plt.axis([0, 5000,-2.1,-1.8])
+plt.legend(["T = 1.0","T = 2.4"])
+plt.xlabel("# of Monte Carlo cycles")
+plt.ylabel("Accepted configurations (normalized)")
+
+"""
+plt.figure()
+plt.plot(MCcycles, Cv, "")
+#plt.axis([0, 5000,-2.1,-1.8])
+plt.xlabel("# of Monte Carlo cycles")
+plt.ylabel("Specific heat $\langle$$C_v$$\\rangle$")
+"""
+"""
+plt.figure()
+plt.plot(MCcycles, susceptibility, "")
+#plt.axis([0, 5000,-2.1,-1.8])
+plt.xlabel("# of Monte Carlo cycles")
+plt.ylabel("Susceptibility $\langle$$\chi$$\\rangle$")
+"""
+plt.show()
 
 """
 -------------
