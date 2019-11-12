@@ -163,7 +163,7 @@ if (Task == "c"){
 
   ofile.open(file3);
   //ofile << setiosflags(ios::showpoint | ios::uppercase);
-  ofile << "|  # Accepted configurations |  Temperature |\n";
+  ofile << "| Temperature | # Accepted configurations| \n";
 
   double InitialTemp = 1.0;
   double FinalTemp = 2.4;
@@ -200,14 +200,14 @@ if (Task == "d"){
   double T = 1.0; // Temperature
 
   long int MC;
-  cout << "Read in the number of Monte Carlo cycles in times of 10" << endl;
+  cout << "Read in the number of Monte Carlo cycles in times of 100" << endl;
   cin >> MC;
 
   int iterations;
   //#pragma omp parallel for
   for (int i=1; i <= MC; i++){
     vec ExpectationValue = zeros<mat>(5);
-    iterations = 10*i;
+    iterations = 100*i;
     // Start Monte Carlo computation and get expectation values
     MetropolisSampling(N, iterations, T, ExpectationValue, Nconfigs, false, Energies, counter);
 
@@ -234,7 +234,7 @@ if (Task == "d"){
   //#pragma omp parallel for
   for (int i=1; i <= MC; i++){
     vec ExpectationValue = zeros<mat>(5);
-    iterations = 10*i;
+    iterations = 100*i;
     // Start Monte Carlo computation and get expectation values
     MetropolisSampling(N, iterations, T, ExpectationValue, Nconfigs, false, Energies2, counter2);
 

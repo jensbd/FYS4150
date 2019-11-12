@@ -70,7 +70,7 @@ void MetropolisSampling(int NSpins, int MCcycles, double Temperature, vec &Expec
     Energies(i) = -800 + 4*i;
   }
 
-  if (MCcycles >= 1000){ // Hard coded the equilibrium state
+  if (MCcycles >= 10000){ // Hard coded the equilibrium state
     Probability(Energy, Energies, counter);
   }
 
