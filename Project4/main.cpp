@@ -341,11 +341,11 @@ double time_used = finish - start;
 cout << "Time used [s]: " << time_used << endl;
 
 WriteT(ofile, L_40, 40, MC, Tvalues);
-ofile <<"\n";
+//ofile <<"\n";
 WriteT(ofile, L_60, 60, MC, Tvalues);
-ofile <<"\n";
+//ofile <<"\n";
 WriteT(ofile, L_80, 80, MC, Tvalues);
-ofile <<"\n";
+//ofile <<"\n";
 WriteT(ofile, L_100, 100, MC, Tvalues);
 ofile.close();  // close output file
 
