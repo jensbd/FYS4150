@@ -174,22 +174,22 @@ void WriteResultsto4b(ofstream& ofile, int NSpins, int MCcycles, double temperat
 
 
   // all expectation values are per spin, divide by 1/NSpins/NSpins
-  double Evariance = (E2_ExpectationValues- E_ExpectationValues*E_ExpectationValues)/NSpins/NSpins; // Energy Variance
-  double Mvariance = (M2_ExpectationValues - Mabs_ExpectationValues*Mabs_ExpectationValues)/NSpins/NSpins; // Magnetization Variance
+  double Evariance = (E2_ExpectationValues- E_ExpectationValues*E_ExpectationValues); // Energy Variance
+  double Mvariance = (M2_ExpectationValues - Mabs_ExpectationValues*Mabs_ExpectationValues); // Magnetization Variance
 
-  double Estd = sqrt(Evariance);
-  double Mstd = sqrt(Mvariance);
+  double Estd = sqrt(Evariance*norm); // Standard deviation of the energy
+  double Mstd = sqrt(Mvariance*norm); // Standard deviation of the magnetization
 
   ofile << setiosflags(ios::showpoint | ios::uppercase);
-  //ofile << "| Temperature | Energy-Mean | Magnetization-Mean|    Cv    | Susceptibility |\n";
+
   ofile << "\n";
   ofile << setw(20) << setprecision(8) << MCcycles; // # Monte Carlo cycles (sweeps per lattice)
   ofile << setw(20) << setprecision(8) << E_ExpectationValues/NSpins/NSpins; // Mean energy
   ofile << setw(20) << setprecision(8) << Mabs_ExpectationValues/NSpins/NSpins; // Mean magetization
-  ofile << setw(20) << setprecision(8) << Evariance/temperature/temperature; // Specific heat Cv
-  ofile << setw(15) << setprecision(8) << Mvariance/temperature; // Susceptibility
-  ofile << setw(15) << setprecision(8) << Estd/NSpins/NSpins; // Standard deviation
-  ofile << setw(15) << setprecision(8) << Mstd/NSpins/NSpins; // Standard deviation
+  ofile << setw(20) << setprecision(8) << Evariance/temperature/temperature/NSpins/NSpins; // Specific heat Cv
+  ofile << setw(15) << setprecision(8) << Mvariance/temperature/NSpins/NSpins; // Susceptibility
+  ofile << setw(15) << setprecision(8) << Estd; // Standard deviation
+  ofile << setw(15) << setprecision(8) << Mstd; // Standard deviation
 } // end output function
 
 
@@ -219,7 +219,7 @@ void WriteResultstoFile2(ofstream& ofile, int NSpins, int MCcycles, double tempe
   double Evariance = (E2_ExpectationValues- E_ExpectationValues*E_ExpectationValues)/NSpins/NSpins;
   double Mvariance = (M2_ExpectationValues - Mabs_ExpectationValues*Mabs_ExpectationValues)/NSpins/NSpins;
   ofile << setiosflags(ios::showpoint | ios::uppercase);
-  //ofile << "| Temperature | Energy-Mean | Magnetization-Mean|    Cv    | Susceptibility |\n";
+
   ofile << "\n";
   ofile << setw(15) << setprecision(8) << temperature;
   ofile << setw(15) << setprecision(8) << E_ExpectationValues/NSpins/NSpins; // Mean energy

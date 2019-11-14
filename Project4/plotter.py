@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 print("Which Project Task do you want to run")
-print("Task C - equilibrium plots, write c")
-print("Task D - probability histogram, write d")
-print("Task E & F - phase transitions and critical temperature, write e")
+print("Task C - Equilibrium State: Write c")
+print("Task D - Probability Histogram: Write d")
+print("Task E & F - Phase Transitions & Critical Temperature: Write e")
 Task = input("Write here: ")
 
 """
@@ -187,23 +187,23 @@ if Task == "e":
         maxSuscp = max(sublistSuscp)
         TCCv.append(temps[sublistCv.index(maxCv)])
         TCX.append(temps[sublistSuscp.index(maxSuscp)])
-        print("TC for Cv =",temps[sublistCv.index(maxCv)])
-        print("TC for X =",temps[sublistSuscp.index(maxSuscp)])
+        print("Tc for Cv =",temps[sublistCv.index(maxCv)])
+        print("Tc for X =",temps[sublistSuscp.index(maxSuscp)])
 
     plt.figure()
     plt.title("Mean Energy")
     plt.xlabel("T [kT/J]")
     plt.ylabel("Energy expectation value $\langle$E$\\rangle$")
     for i in range(int(len(energylist)/len(temps))):
-        plt.plot(temps,energylist[i*len(temps):len(temps)*(i+1)])
-    plt.legend(["L = 40","L = 60","L = 80","L = 100"])
+        plt.plot(temps,energylist[i*len(temps):len(temps)*(i+1)],"--o")
+    plt.legend(["L = 40","L = 60","L = 80","L = 100"],"")
 
     plt.figure()
     plt.title("Absolute mean Magnetization")
     plt.xlabel("T [kT/J]")
     plt.ylabel("Magnetization expectation value $\langle$|M|$\\rangle$")
     for i in range(int(len(energylist)/len(temps))):
-        plt.plot(temps,maglist[i*len(temps):len(temps)*(i+1)])
+        plt.plot(temps,maglist[i*len(temps):len(temps)*(i+1)],"--o")
     plt.legend(["L = 40","L = 60","L = 80","L = 100"])
 
     plt.figure()
@@ -211,7 +211,7 @@ if Task == "e":
     plt.xlabel("T [kT/J]")
     plt.ylabel("Specific heat $\langle$$C_v$$\\rangle$")
     for i in range(int(len(energylist)/len(temps))):
-        plt.plot(temps,Cvlist[i*len(temps):len(temps)*(i+1)])
+        plt.plot(temps,Cvlist[i*len(temps):len(temps)*(i+1)],"--o")
     plt.legend(["L = 40","L = 60","L = 80","L = 100"])
 
 
@@ -220,7 +220,7 @@ if Task == "e":
     plt.xlabel("T [kT/J]")
     plt.ylabel("Susceptibility $\langle$$\chi$$\\rangle$")
     for i in range(int(len(energylist)/len(temps))):
-        plt.plot(temps,Suscplist[i*len(temps):len(temps)*(i+1)])
+        plt.plot(temps,Suscplist[i*len(temps):len(temps)*(i+1)],"--o")
     plt.legend(["L = 40","L = 60","L = 80","L = 100"])
     plt.show()
 
@@ -228,14 +228,31 @@ if Task == "e":
     Task f)
     """
     #Performing a linear regression to find critical temp in thermodyn. limit
-    meanTC = 0.5*(np.array(TCCv) +np.array(TCX))
+    TCCv = np.array(TCCv)
+    TCX = np.array(TCX)
     Llist = np.array([40,60,80,100])
     Llist = 1.0/Llist
 
-    linreg = np.polyfit(Llist,meanTC,1)
-    values = np.polyval(linreg, np.linspace(2.275,2.325,100))
-    plt.plot(Llist,meanTC,"o")
-    plt.plot(Llist,np.polyval(linreg,Llist))
-    plt.legend(["Mean $T_C$","Linear fit = %gx + %g" % (linreg[0],linreg[1])])
+    linreg1 = np.polyfit(Llist,TCCv,1)
+    linreg2 = np.polyfit(Llist,TCX,1)
+
+    plt.figure()
+    plt.title("Specific heat $C_V$")
+    plt.xlabel("$\\frac{1}{L}$")
+    plt.ylabel("$T_C$ [kT/J]")
+    plt.plot(Llist,TCCv,"o")
+    plt.plot(Llist,np.polyval(linreg1,Llist))
+    plt.legend(["$T_C$(L) from simulations","$T_C(L)$ = a$\\cdot$ $\\frac{1}{L}$ + $T_C(L = \infty)$ $\\to$ %g$\\cdot$x + %g" % (linreg1[0],linreg1[1])])
+
+    plt.figure()
+    plt.title("Susceptibility $\chi$")
+    plt.xlabel("$\\frac{1}{L}$")
+    plt.ylabel("$T_C$ [kT/J]")
+    plt.plot(Llist,TCX,"o")
+    plt.plot(Llist,np.polyval(linreg2,Llist))
+    plt.legend(["$T_C$(L) from simulations","$T_C(L)$ = a$\\cdot$ $\\frac{1}{L}$ + $T_C(L = \infty)$ $\\to$ %g$\\cdot$x + %g" % (linreg2[0],linreg2[1])])
+
+    print("\n")
+    print("The estimated Critical Temperature from our simulations is Tc = %g " % (0.5*(linreg1[1]+linreg2[1])))
 
     plt.show()

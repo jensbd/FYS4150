@@ -35,10 +35,10 @@ ofstream ofile;
 int main(int argc, char* argv[]) {
 
 cout << "\n" << "Which Project Task do you want to run?: " << endl;
-cout << "\n" << "Project Task a & b: " <<  "Write b " << endl;
-cout << "\n" << "Project Task c: " <<  "Write c " << endl;
-cout << "\n" << "Project Task d: " <<  "Write d " << endl;
-cout << "\n" << "Project Task e: " <<  "Write e " << endl;
+cout << "\n" << "Project Task A & B - Ising Model vs Analytical: " <<  "Write b " << endl;
+cout << "\n" << "Project Task C - Equilibrium: " <<  "Write c " << endl;
+cout << "\n" << "Project Task D - Probability Distribution: " <<  "Write d " << endl;
+cout << "\n" << "Project Task E & F - Phase Transition & Critical Temperature: " <<  "Write e " << endl;
 
 
 cout << "\n" << "Write here " << endl;
@@ -70,9 +70,8 @@ ofile.open(file);
 
 ofile << "|   # Monte Carlo cycles  | Energy-Mean | Magnetization-Mean |  Specific heat  | Susceptibility | Energy-STD | Magnetization-STD |\n";
 
-int NSpins;
+int NSpins = 2;
 int Nconfigs;
-NSpins = 2;
 long int MCcycles;
 double Temp = 1.0;
 
@@ -262,7 +261,7 @@ ofile.open(file);
 ofile << "| Temperature | Energy-Mean | Magnetization-Mean |  Specific heat  | Susceptibility |\n";
 
 // Start Monte Carlo sampling by looping over the selcted Temperatures
-int N_start, N_step, N_final;
+int N_start, N_step, N_final, n;
 int Nconfigs;
 long int MC;
 double T_start, T_step, T_final, T;
@@ -272,24 +271,28 @@ double T_start, T_step, T_final, T;
 cout << "Read in the number of Monte Carlo cycles" << endl;
 cin >> MC;
 
-/*
+
 cout << "Read in the initial value for the Temperature" << endl;
 cin >> T_start;
-cout << "Read in the step size for the Temperature" << endl;
-cin >> T_step;
 cout << "Read in the final value for the Temperature" << endl;
 cin >> T_final;
+cout << "Read in the number of integration points" << endl;
+cin >> n;
+T_step = (T_final - T_start)/((double) n);
+
+cout << "T_step = " << T_step << endl;
+
+/*
+T_start = 2.15;
+T_step = 0.0075;
+T_final = 2.35;
 */
 
-T_start = 2.2;
-T_step = 0.025;
-T_final = 2.4;
-
 // Declare a matrix which stores the expectation values for spins 40, 60, 80, 100
-mat L_40 = zeros<mat>(9, 5);
-mat L_60 = zeros<mat>(9, 5);
-mat L_80 = zeros<mat>(9, 5);
-mat L_100 = zeros<mat>(9, 5);
+mat L_40 = zeros<mat>(n, 5);
+mat L_60 = zeros<mat>(n, 5);
+mat L_80 = zeros<mat>(n, 5);
+mat L_100 = zeros<mat>(n, 5);
 
 N_start = 40;
 N_step = 20;
@@ -297,7 +300,7 @@ N_final = 100;
 
 // Time the loop
 double start = omp_get_wtime();
-vec Tvalues = zeros<mat>(9);
+vec Tvalues = zeros<mat>(n);
 
 for (int N = N_start; N <= N_final; N += N_step){
 
@@ -305,7 +308,7 @@ for (int N = N_start; N <= N_final; N += N_step){
 
 #pragma omp parallel for
 // Start Monte Carlo sampling by looping over the selcted Temperatures
-for (int i = 0; i <= 8; i++){
+for (int i = 0; i < n; i++){
   vec ExpectationValue = zeros<mat>(5);
 
 
