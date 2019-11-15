@@ -1,12 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
+import os
 print("Which Project Task do you want to run")
 print("Task C - Equilibrium State: Write c")
 print("Task D - Probability Histogram: Write d")
 print("Task E & F - Phase Transitions & Critical Temperature: Write e")
 Task = input("Write here: ")
 
+tablesdir = os.path.join(os.path.dirname(__file__), '..', 'Tables')
+plotsdir = os.path.join(os.path.dirname(__file__), '..', 'Results/Plots')
 """
 -------------
 Equilibrium
@@ -29,7 +31,7 @@ if Task == "c":
     NconfigsU = []
     NconfigsU2 = []
     for i in (filenames):
-        with open(i) as file:
+        with open(os.path.join(tablesdir,i)) as file:
             lines = file.readlines()
             #Skip the first two lines
             for j in range(2,len(lines)):
@@ -44,7 +46,7 @@ if Task == "c":
                     magO2.append(float(pieces[2]))
 
     for i in (filenames2):
-        with open(i) as file:
+        with open(os.path.join(tablesdir,i)) as file:
             lines = file.readlines()
             #Skip the first two lines
             for j in range(2,len(lines)):
@@ -66,6 +68,7 @@ if Task == "c":
     plt.legend(["T = 1.0","T = 2.4"])
     plt.xlabel("# of Monte Carlo cycles")
     plt.ylabel("Energy expectation value $\langle$E$\\rangle$ [J]")
+    plt.savefig(os.path.join(plotsdir,"Energy_exp_ordered.png"))
 
     plt.figure()
     plt.title("Unordered")
@@ -74,6 +77,7 @@ if Task == "c":
     plt.legend(["T = 1.0","T = 2.4"])
     plt.xlabel("# of Monte Carlo cycles")
     plt.ylabel("Energy expectation value $\langle$E$\\rangle$ [J]")
+    plt.savefig(os.path.join(plotsdir,"Energy_exp_unordered.png"))
 
     plt.figure()
     plt.title("Ordered")
@@ -82,6 +86,8 @@ if Task == "c":
     plt.legend(["T = 1.0","T = 2.4"])
     plt.xlabel("# of Monte Carlo cycles")
     plt.ylabel("Magnetization expectation value $\langle$|M|$\\rangle$ [1]")
+    plt.savefig(os.path.join(plotsdir,"Magn_exp_ordered.png"))
+
 
     plt.figure()
     plt.title("Unordered")
@@ -90,6 +96,7 @@ if Task == "c":
     plt.legend(["T = 1.0","T = 2.4"])
     plt.xlabel("# of Monte Carlo cycles")
     plt.ylabel("Magnetization expectation value $\langle$|M|$\\rangle$ [1]")
+    plt.savefig(os.path.join(plotsdir,"Magn_exp_unordered.png"))
 
     plt.figure()
     plt.title("Unordered")
@@ -98,10 +105,11 @@ if Task == "c":
     plt.legend(["T = 1.0","T = 2.4"])
     plt.xlabel("# of Monte Carlo cycles")
     plt.ylabel("Accepted configurations (normalized)")
+    plt.savefig(os.path.join(plotsdir,"Accepted_configs_unordered.png"))
 
     Temp = []
     configs = []
-    with open("Nconfig_vs_Temp") as file:
+    with open(os.path.join(tablesdir,"Nconfig_vs_Temp")) as file:
         lines = file.readlines()
         for i in range(2,len(lines)):
 
@@ -113,6 +121,7 @@ if Task == "c":
     plt.xlabel("Temperature [kT/J]")
     plt.ylabel("Accepted number of configurations (normalized)")
     plt.title("Accepted number of configurations (normalized) as a function of T")
+    plt.savefig(os.path.join(plotsdir,"Accepted_configs_temperature.png"))
     plt.show()
 
 """
@@ -126,7 +135,7 @@ if Task == "d":
 
 
     for i in filenames:
-        with open(i) as file:
+        with open(os.path.join(tablesdir,i)) as file:
             lines = file.readlines()
         Energies = []
         counts = []
@@ -144,18 +153,22 @@ if Task == "d":
                 most_probable_energy = energy
         plt.bar(Energies,counts,width = 4 if i == "Probability_1" else 3)
         plt.xlim(-805,-770) if i == "Probability_1" else plt.xlim(-705,-305)
-        plt.xlabel("Energy")
+        plt.xlabel("Energy [J]")
         plt.ylabel("Energy counts")
+        plt.tight_layout()
+        plt.subplots_adjust(top=0.88)
+
         if i == "Probability_1":
             plt.title("T = 1.0")
         else:
             plt.title("T = 2.4")
         props = dict(boxstyle='round', facecolor='wheat', alpha=1)
         plt.text(0.05*(plt.xlim()[1]-plt.xlim()[0])+plt.xlim()[0] ,plt.ylim()[1]*0.85, "Most probable energy:\n" + str(most_probable_energy), bbox = props)
+        plt.savefig(os.path.join(plotsdir,i+".png"))
         plt.show()
 
 if Task == "e":
-    with open("Temperature") as file:
+    with open(os.path.join(tablesdir,"Temperature_100")) as file:
         lines = file.readlines()
     temps = []
     energylist = []
@@ -197,6 +210,7 @@ if Task == "e":
     for i in range(int(len(energylist)/len(temps))):
         plt.plot(temps,energylist[i*len(temps):len(temps)*(i+1)],"")
     plt.legend(["L = 40","L = 60","L = 80","L = 100"])
+    plt.savefig(os.path.join(plotsdir,"Phase_trans_energy.png"))
 
     plt.figure()
     plt.title("Absolute mean Magnetization")
@@ -205,6 +219,8 @@ if Task == "e":
     for i in range(int(len(energylist)/len(temps))):
         plt.plot(temps,maglist[i*len(temps):len(temps)*(i+1)],"")
     plt.legend(["L = 40","L = 60","L = 80","L = 100"])
+    plt.savefig(os.path.join(plotsdir,"Phase_trans_mag.png"))
+
 
     plt.figure()
     plt.title("Specific heat")
@@ -213,6 +229,7 @@ if Task == "e":
     for i in range(int(len(energylist)/len(temps))):
         plt.plot(temps,Cvlist[i*len(temps):len(temps)*(i+1)],"")
     plt.legend(["L = 40","L = 60","L = 80","L = 100"])
+    plt.savefig(os.path.join(plotsdir,"Phase_trans_Cv.png"))
 
 
     plt.figure()
@@ -222,6 +239,8 @@ if Task == "e":
     for i in range(int(len(energylist)/len(temps))):
         plt.plot(temps,Suscplist[i*len(temps):len(temps)*(i+1)],"")
     plt.legend(["L = 40","L = 60","L = 80","L = 100"])
+    plt.savefig(os.path.join(plotsdir,"Phase_trans_suscp.png"))
+
     plt.show()
 
     """
@@ -243,6 +262,7 @@ if Task == "e":
     plt.plot(Llist,TCCv,"o")
     plt.plot(Llist,np.polyval(linreg1,Llist))
     plt.legend(["$T_C$(L) from simulations","$T_C(L)$ = a$\\cdot$ $\\frac{1}{L}$ + $T_C(L = \infty)$ $\\to$ %g$\\cdot$x + %g" % (linreg1[0],linreg1[1])])
+    plt.savefig(os.path.join(plotsdir,"linregCv.png"))
 
     plt.figure()
     plt.title("Susceptibility $\chi$")
@@ -251,6 +271,7 @@ if Task == "e":
     plt.plot(Llist,TCX,"o")
     plt.plot(Llist,np.polyval(linreg2,Llist))
     plt.legend(["$T_C$(L) from simulations","$T_C(L)$ = a$\\cdot$ $\\frac{1}{L}$ + $T_C(L = \infty)$ $\\to$ %g$\\cdot$x + %g" % (linreg2[0],linreg2[1])])
+    plt.savefig(os.path.join(plotsdir,"linregX.png"))
 
     print("\n")
     print("The estimated Critical Temperature from our simulations is Tc = %g " % (0.5*(linreg1[1]+linreg2[1])))
