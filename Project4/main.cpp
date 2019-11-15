@@ -4,13 +4,6 @@
    The coupling constant J is set to J = 1
    Boltzmann's constant = 1, temperature has thus dimension energy
    Metropolis aolgorithm  is used as well as periodic boundary conditions.
-   The code needs an output file on the command line and the variables mcs, nspins,
-   initial temp, final temp and temp step.
-   Run as
-   ./executable Outputfile numberof spins number of MC cycles initial temp final temp tempstep
-   ./test.x Lattice 100 10000000 2.1 2.4 0.01
-   Compile and link as
-   c++ -O3 -std=c++11 -Rpass=loop-vectorize -o Ising.x IsingModel.cpp -larmadillo
 */
 
 #include <cmath>
