@@ -164,8 +164,9 @@ void WriteResultstoFile(ofstream& ofile, int NSpins, int MCcycles, double temper
 
 
 void WriteResultsto4b(ofstream& ofile, int NSpins, int MCcycles, double temperature, vec ExpectationValues, int Nconfigs)
-{
-  double norm = 1.0/((double) (MCcycles));  // divided by  number of cycles
+{ // divided by  number of MCcycles
+  double norm = 1.0/((double) (MCcycles));
+  
   double E_ExpectationValues = ExpectationValues(0)*norm;
   double E2_ExpectationValues = ExpectationValues(1)*norm;
   double M_ExpectationValues = ExpectationValues(2)*norm;

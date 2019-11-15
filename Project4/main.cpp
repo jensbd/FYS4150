@@ -56,11 +56,16 @@ double Mabs = 8*(exp(8) + 2)/(Z);
 double Cv = 4*64*(4 + 6*exp(8) + 6*exp(-8))/(Z*Z);
 double Xi = (32.0/(Z))*( (exp(8) + 1) - (2.0/(Z))* pow((exp(8) + 2),2) );
 
-cout << "\n" << "Analytical values for all the expectation values \n";
-cout << "Energy Mean per spin = " << E/4 << "\n";
-cout << "Absolute Magnetization Mean per spin = " << Mabs/4 << "\n";
-cout << "Specific heat per spin = " << Cv/4 << "\n";
-cout << "Susceptibility per spin = " << Xi/4 << "\n";
+int NSpins = 2;
+
+// Divide by number of spins
+double norm = 1.0/NSpins/NSpins;
+
+cout << "\n" << "Analytical values for all the expectation values divided by the number of spins \n";
+cout << "Energy Mean per spin = " << E*norm << "\n";
+cout << "Absolute Magnetization Mean per spin = " << Mabs*norm << "\n";
+cout << "Specific heat per spin = " << Cv*norm << "\n";
+cout << "Susceptibility per spin = " << Xi*norm << "\n";
 
 
 cout << "\n" << "Project Task 4b: \n" << endl;
@@ -70,7 +75,6 @@ ofile.open(file);
 
 ofile << "|   # Monte Carlo cycles  | Energy-Mean | Magnetization-Mean |  Specific heat  | Susceptibility | Energy-STD | Magnetization-STD |\n";
 
-int NSpins = 2;
 int Nconfigs;
 long int MCcycles;
 double Temp = 1.0;
@@ -282,11 +286,7 @@ T_step = (T_final - T_start)/((double) n);
 
 cout << "T_step = " << T_step << endl;
 
-/*
-T_start = 2.15;
-T_step = 0.0075;
-T_final = 2.35;
-*/
+
 
 // Declare a matrix which stores the expectation values for spins 40, 60, 80, 100
 mat L_40 = zeros<mat>(n, 5);
