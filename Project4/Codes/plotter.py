@@ -65,7 +65,7 @@ if Task == "c":
     plt.plot(MCcycles,energyO2)
     plt.legend(["T = 1.0","T = 2.4"])
     plt.xlabel("# of Monte Carlo cycles")
-    plt.ylabel("Energy expectation value $\langle$E$\\rangle$")
+    plt.ylabel("Energy expectation value $\langle$E$\\rangle$ [J]")
 
     plt.figure()
     plt.title("Unordered")
@@ -73,7 +73,7 @@ if Task == "c":
     plt.plot(MCcycles,energyU2)
     plt.legend(["T = 1.0","T = 2.4"])
     plt.xlabel("# of Monte Carlo cycles")
-    plt.ylabel("Energy expectation value $\langle$E$\\rangle$")
+    plt.ylabel("Energy expectation value $\langle$E$\\rangle$ [J]")
 
     plt.figure()
     plt.title("Ordered")
@@ -81,7 +81,7 @@ if Task == "c":
     plt.plot(MCcycles, magO2, "")
     plt.legend(["T = 1.0","T = 2.4"])
     plt.xlabel("# of Monte Carlo cycles")
-    plt.ylabel("Magnetization expectation value $\langle$|M|$\\rangle$")
+    plt.ylabel("Magnetization expectation value $\langle$|M|$\\rangle$ [1]")
 
     plt.figure()
     plt.title("Unordered")
@@ -89,7 +89,7 @@ if Task == "c":
     plt.plot(MCcycles, magU2, "")
     plt.legend(["T = 1.0","T = 2.4"])
     plt.xlabel("# of Monte Carlo cycles")
-    plt.ylabel("Magnetization expectation value $\langle$|M|$\\rangle$")
+    plt.ylabel("Magnetization expectation value $\langle$|M|$\\rangle$ [1]")
 
     plt.figure()
     plt.title("Unordered")
@@ -193,34 +193,34 @@ if Task == "e":
     plt.figure()
     plt.title("Mean Energy")
     plt.xlabel("T [kT/J]")
-    plt.ylabel("Energy expectation value $\langle$E$\\rangle$")
+    plt.ylabel("Energy expectation value $\langle$E$\\rangle$ [J]")
     for i in range(int(len(energylist)/len(temps))):
-        plt.plot(temps,energylist[i*len(temps):len(temps)*(i+1)],"--o")
-    plt.legend(["L = 40","L = 60","L = 80","L = 100"],"")
+        plt.plot(temps,energylist[i*len(temps):len(temps)*(i+1)],"")
+    plt.legend(["L = 40","L = 60","L = 80","L = 100"])
 
     plt.figure()
     plt.title("Absolute mean Magnetization")
     plt.xlabel("T [kT/J]")
-    plt.ylabel("Magnetization expectation value $\langle$|M|$\\rangle$")
+    plt.ylabel("Magnetization expectation value $\langle$|M|$\\rangle$ [1]")
     for i in range(int(len(energylist)/len(temps))):
-        plt.plot(temps,maglist[i*len(temps):len(temps)*(i+1)],"--o")
+        plt.plot(temps,maglist[i*len(temps):len(temps)*(i+1)],"")
     plt.legend(["L = 40","L = 60","L = 80","L = 100"])
 
     plt.figure()
     plt.title("Specific heat")
     plt.xlabel("T [kT/J]")
-    plt.ylabel("Specific heat $\langle$$C_v$$\\rangle$")
+    plt.ylabel("Specific heat $\langle$$C_v$$\\rangle$ [$J^2/kT^2$]")
     for i in range(int(len(energylist)/len(temps))):
-        plt.plot(temps,Cvlist[i*len(temps):len(temps)*(i+1)],"--o")
+        plt.plot(temps,Cvlist[i*len(temps):len(temps)*(i+1)],"")
     plt.legend(["L = 40","L = 60","L = 80","L = 100"])
 
 
     plt.figure()
     plt.title("Susceptibility")
     plt.xlabel("T [kT/J]")
-    plt.ylabel("Susceptibility $\langle$$\chi$$\\rangle$")
+    plt.ylabel("Susceptibility $\langle$$\chi$$\\rangle$ [1/kT]")
     for i in range(int(len(energylist)/len(temps))):
-        plt.plot(temps,Suscplist[i*len(temps):len(temps)*(i+1)],"--o")
+        plt.plot(temps,Suscplist[i*len(temps):len(temps)*(i+1)],"")
     plt.legend(["L = 40","L = 60","L = 80","L = 100"])
     plt.show()
 
