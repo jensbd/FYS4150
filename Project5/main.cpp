@@ -31,6 +31,7 @@ int main(int argc, char* argv[]){
   if (Dimension == "1"){
 
 
+
   cout << "\n" << "Choose step size for Delta x: " << endl;
   cout << "\n" << "Delta x = 0.1: " <<  "Write 0.1 " << endl;
   cout << "\n" << "Delta x= 0.01 " <<  "Write 0.01 " << endl;
@@ -44,7 +45,7 @@ int main(int argc, char* argv[]){
 
 
   // Defining alpha
-  double alpha = dt/(dx**2)
+  double alpha = dt/dx/dx;
 
   // Number of integration points along x-axis (inner points only)
   int N = int(1.0/(dx));
@@ -54,8 +55,11 @@ int main(int argc, char* argv[]){
 
   // Defining u
   mat u = zeros<mat>(T,N+2);
+  mat u_analytic = zeros<mat>(T,N+2);
 
-  vec x = linspace<vec>(0,1,N+2)
+
+
+  vec x = linspace<vec>(0,1,N+2);
 
 
   // Implement boundaries rigidly
@@ -63,12 +67,17 @@ int main(int argc, char* argv[]){
   // implement boundary for last end point
   for (int t = 0; t < T; t++){
     u(t,N+1) = 1.0;
+    u_analytic(t,N+1) = 1.0;
   }
 
   // Initial codition
-  g(u(0), N);
+  g(u, N);
+  g(u_analytic, N);
 
+  analytic(u_analytic, N, T, x, dt);
 
+//  u = u.t();
+//  u_analytic = u_analytic.t();
 
   cout << "\n" << "Which method do you want to use to solve the diffusion equation?: " << endl;
   cout << "\n" << "Forward Euler- Explicit Scheme: " <<  "Write FE " << endl;
@@ -81,15 +90,23 @@ int main(int argc, char* argv[]){
   cin >> Method;
 
 if (Method == "FE"){
-
-
   forward_euler(alpha, u, N, T);
+  cout << (u_analytic - u) << endl;
 
-  
+}
+if (Method == "BE"){
+  backward_euler(alpha,u,N,T);
+  cout << (u_analytic - u) << endl;
+}
+if (Method == "CN"){
+  crank_nicolson(alpha, u, N, T);
+  cout << (u_analytic - u) << endl;
+}
 
 
 
-      }
+
+
   }
 
 
