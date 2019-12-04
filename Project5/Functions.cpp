@@ -1,5 +1,5 @@
 #include "Functions.h"
-#include "omp.h"
+#include <omp.h>
 
 
 // Code for solving the 1+1 dimensional diffusion equation
@@ -122,4 +122,50 @@ void analytic(mat &u, int N, int T, vec x, double dt){
       u(t,i) = x(i)/L - (2.0/(pi))*sin(x(i)*pi/L)*exp(-pi*pi*t*dt/(L*L));
     }
   }
+}
+
+
+
+// Function for setting up the iterative Jacobi solver
+int JacobiSolver(int N, double dx, double dt, mat &A, mat &q, double abstol)
+{
+  int MaxIterations = 100000;
+  mat Aold = zeros<mat>(N,N);
+
+  double D = dt/(dx*dx);
+
+  for(int i=1;  i < N-1; i++)
+    for(int j=1; j < N-1; j++)
+      Aold(i,j) = 1.0;
+
+  // Boundary Conditions -- all zeros
+  for(int i=0; i < N; i++){
+    A(0,i) = 0.0;
+    A(N-1,i) = 0.0;
+    A(i,0) = 0.0;
+    A(i,N-1) = 0.0;
+  }
+  // Start the iterative solver
+  for(int k = 0; k < MaxIterations; k++){
+    for(int i = 1; i < N-1; i++){
+      for(int j=1; j < N-1; j++){
+	A(i,j) = dt*q(i,j) + Aold(i,j) +
+	  D*(Aold(i+1,j) + Aold(i,j+1) - 4.0*Aold(i,j) +
+	     Aold(i-1,j) + Aold(i,j-1));
+      }
+    }
+    double sum = 0.0;
+    for(int i = 0; i < N;i++){
+      for(int j = 0; j < N;j++){
+	sum += (Aold(i,j)-A(i,j))*(Aold(i,j)-A(i,j));
+	Aold(i,j) = A(i,j);
+      }
+    }
+    if(sqrt (sum) <abstol){
+      return k;
+    }
+  }
+  cout << "Jacobi: Maximum Number of Interations Reached Without Convergence\n";
+  return MaxIterations;
+
 }

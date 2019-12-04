@@ -114,9 +114,65 @@ if (Method == "CN"){
 
 
     cout << "\n" << "In progress: " << endl;
+
+
+  /* Simple program for solving the two-dimensional diffusion
+     equation or Poisson equation using Jacobi's iterative method
+     Note that this program does not contain a loop over the time
+     dependence. It uses OpenMP to parallelize
+
+*/
+
+cout << "\n" << "Choose step size for Delta x: " << endl;
+cout << "\n" << "Delta x = 0.1: " <<  "Write 0.1 " << endl;
+cout << "\n" << "Delta x= 0.01 " <<  "Write 0.01 " << endl;
+
+double PI = 4*atan(1);
+
+
+// Step length in position x
+double dx;
+cin >> dx;
+
+// Step length in time
+double dt = 0.25*dx*dx;
+
+
+// Defining alpha
+double alpha = dt/dx/dx;
+
+// Number of integration points along x-axis (inner points only)
+int N = (1.0/(dx));
+
+// Number of time steps till final time
+int T = N;
+
+double ExactSolution;
+double tolerance = 1.0e-10;
+mat A = zeros<mat>(N,N);
+mat q = zeros<mat>(N,N);
+
+// setting up an additional source term
+  for(int i = 0; i < N; i++){
+    for(int j = 0; j < N; j++){
+      q(i,j) = -2.0*PI*PI*sin(PI*dx*i)*sin(PI*dx*j);
+    }
+}
+  int itcount = JacobiSolver(N,dx,dt,A,q,tolerance);
+
+  // Testing against exact solution
+  double sum = 0.0;
+  for(int i = 0; i < N; i++){
+    for(int j=0;j < N; j++){
+      ExactSolution = -sin(PI*dx*i)*sin(PI*dx*j);
+      sum += fabs((A(i,j) - ExactSolution));
+    }
   }
+  cout << setprecision(5) << setiosflags(ios::scientific);
+  cout << "Jacobi method with error " << sum/N << " in " << itcount << " iterations" << endl;
 
 
+}
   return 0;
 
 }

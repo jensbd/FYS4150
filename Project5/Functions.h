@@ -9,6 +9,7 @@
 #include <random>
 #include <armadillo>
 #include <string>
+#include <omp.h>
 
 using namespace  std;
 using namespace arma;
@@ -22,5 +23,7 @@ void backward_euler(double, mat &, int, int);
 void crank_nicolson(double, mat &, int, int);
 void g(mat &, int);
 void analytic(mat &, int, int, vec, double);
+int JacobiSolver(int, double, double, mat &, mat &, double);
+
 
 #endif
