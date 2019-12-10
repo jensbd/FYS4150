@@ -90,10 +90,10 @@ if dim == "1":
 
 if dim == "2":
     for dx in [0.1,0.01]:
-        dt = 0.5*dx*dx
-        T = int(1.0/dt)
+        dt = 0.2*dx*dx
+        T = int(0.1/dt)
         #Generate t-mesh
-        t = np.linspace(0,1,T)
+        t = np.linspace(0,0.1,T)
         #Generate x- and y-mesh
         N = int(1.0/dx)
         x = np.linspace(0,1,N+2)
@@ -101,16 +101,19 @@ if dim == "2":
         filename = "2dim_explicit:"+str(dx)
         with open(filename) as file:
             lines = file.readlines()
-            for t in range(T):
+            for t in tqdm(range(T)):
                 u = np.zeros((len(x),len(y)))
-                for i in range(len(x)):
-                    u[i] = lines[t*len(x)+i].split()
+                for i in range(len(y)):
+                    data = lines[t*len(x)+i].split()
+
+                    u[i] = data
 
                 fig = plt.figure();
-                x,y = np.meshgrid(x,y)
+                x_,y_ = np.meshgrid(x,y)
+
                 ax = fig.gca(projection='3d');
                 # Plot the surface.
-                surf = ax.plot_surface(x, y, u, cmap=cm.coolwarm,
+                surf = ax.plot_surface(x_, y_, u, cmap=cm.coolwarm,
                                    linewidth=0, antialiased=False);
                                    # Customize the z axis.
                 #ax.set_zlim(-0.10, 1.40);
@@ -118,11 +121,11 @@ if dim == "2":
                     ax.view_init(40,angle)
                 ax.zaxis.set_major_locator(LinearLocator(10));
                 ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'));
-                plt.xlabel("x")
+                plt.xlabel("x")                                         
                 plt.ylabel("y")
-                name = "2dim_ecplicit: dx = "+str(dx)
+                name = "2dim_explicit: dx = "+str(dx)
                 plt.title(name)
-                fig.savefig("plots/2dim/"+name+".png")
+                fig.savefig("plots/2dim/"+str(dx)+"/"+name+","+str(t)+".png")
 
 else:
     print("Please write either 1 or 2")

@@ -149,7 +149,7 @@ double dx;
 cin >> dx;
 
 // Step length in time
-double dt = 0.5*dx*dx;
+double dt = 0.2*dx*dx;
 
 
 // Defining alpha
@@ -159,10 +159,11 @@ double alpha = dt/dx/dx;
 int N = int(1.0/(dx));
 
 // Number of time steps till final time
-int T = int(1.0/dt);
+int T = int(0.1/dt);
+
+
 cube u = zeros<cube>(N+2,N+2,T);
 cube u_analytic = zeros<cube>(N+2,N+2,T);
-
 //Boundary conditions
 for (int t = 0; t < T; t++){
   for (int n = 0; n < N+2; n++){
@@ -176,10 +177,9 @@ file.erase ( file.find_last_not_of('0') + 1, std::string::npos );
 ofile.open(file);
 for (int t = 0; t < T; t++){
   ofile << u.slice(t);
-  ofile << "\n";
 }
 ofile.close();
-
+/*
 double PI = 4*atan(1);
 
 
@@ -209,8 +209,7 @@ mat q = zeros<mat>(N,N);
   }
   cout << setprecision(5) << setiosflags(ios::scientific);
   cout << "Jacobi method with error " << sum/N<< " in " << itcount << " iterations" << endl;
-
-
+*/
 }
 
 
