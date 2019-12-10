@@ -17,8 +17,11 @@ using namespace arma;
 
 
 void forward_step(double, rowvec &, rowvec &, int);
+void forward_step_2dim(double, mat &, mat &, int);
 void forward_euler(double, mat &, int, int);
+void forward_euler_2dim(double, cube &, int, int);
 void tridiag(double, rowvec &, int);
+void tridiag_solver(rowvec &, rowvec , int , double);
 void backward_euler(double, mat &, int, int);
 void crank_nicolson(double, mat &, int, int);
 void g(mat &, int);
