@@ -76,14 +76,14 @@ void tridiag(double alpha, rowvec &u, int N){
     Tridiagonal gaus-eliminator, specialized to diagonal = 1+2*alpha,
     super- and sub- diagonal = - alpha
     */
-
+    N = N + 2;
     vec d(N);
     d.fill(1+2*alpha);
     vec b(N-1);
     b.fill(- alpha);
 
     //Forward eliminate
-    for (int i = 1; i < N; i++){
+    for (int i = 1; i < N-1; i++){
         //Normalize row i (i in u convention):
         b(i-1) /= d(i-1);
         u(i) /= d(i-1); //Note: row i in u = row i-1 in the matrix
@@ -93,39 +93,48 @@ void tridiag(double alpha, rowvec &u, int N){
         d(i) += b(i-1)*alpha;
     }
     //Normalize bottom row
-    u(N) /= d(N-1);
-    d(N-1) = 1.0;
+    u(N-1) /= d(N-2);
+    d(N-2) = 1.0;
 
     // Backward substitute
-    for (int i = N; i > 1; i--){ // loop from i=N to i=2
-        u(i-1) -= u(i)*b(i-2);
-        //b(i-2) = 0.0; // Never read
+    for (int i = N-1; i > 0; i--){ // loop from i=N to i=2
+        u(i-1) -= u(i)*b(i-1);
+        //b(i-2) = 0;
       }
 }
-/*
-void tridiag_solver(rowvec &x, rowvec y, int N, double alpha)
-{
-  x.set_size(N);
-  double b = -alpha;
-  double d = 1+2*alpha;
-  double bb = b*b;
 
-  vec diag(N); diag.fill(d);
+void LU_Decomp_Arma(double alpha, rowvec &u, int N){
+    // This function uses Armadillo
+    mat A = zeros<mat>(N,N);  //Creating a n x n matrix filled with zeros
 
-  y(1) += -b*y(0);
-  for (int i = 2; i < N - 1; ++i) {
-    diag(i) +=       -bb/diag(i-1);
-       y(i) += -b*y(i-1)/diag(i-1);
-  }
+    // Setting up the matrix and the right-hand side vector with correct values
+    A(0,0) = 1+2*alpha;  A(0,1) = -alpha;
+    for (int i = 1; i < N-1; i++){
+     A(i,i-1)  = -alpha;
+     A(i,i)    = 1+2*alpha;
+     A(i+1,i)  = -alpha;
+    }
+    A(N-1,N-1) = 1+2*alpha; A(N-2,N-1) = -alpha;
 
-  x(0) = y(0); x(N - 1) = y(N - 1);
-  for (int i = N - 2; i > 0; --i) {
-    x(i) = (y(i) - b*x(i + 1))/diag(i);
-  }
 
-  return;
+    // Solving u⁻1 = Au
+    vec u_temp(N);
+    for (int i = 1; i < N; i++){
+      u_temp(i-1) = u(i);
+    }
+    u_temp(N-1) = u(N);
+
+    vec BC = zeros<vec>(N);
+    BC(N-1) = alpha;
+    mat A_1 = inv(A);
+    //vec u_temp1  = solve(A, u_temp + BC);
+    vec u_temp1 = A_1*(u_temp + BC);
+
+    for (int i = 0; i < N; i++){
+      u(i+1) = u_temp1(i);
+    }
 }
-*/
+
 void backward_euler(double alpha, mat &u, int N, int T){
     /*
     Implements backward euler scheme by gaus-elimination of tridiagonal matrix.
@@ -136,8 +145,8 @@ void backward_euler(double alpha, mat &u, int N, int T){
         //u.row(t) = u.row(t-1); // .copy() ?
         u_temp_row = u.row(t-1);
         tridiag(alpha,u_temp_row, N); //Note: Passing a pointer to row t, which is modified in-place
+        u_temp_row(0) = 0; u_temp_row(N+1) = 1;
         u.row(t) = u_temp_row;
-
       }
 }
 
@@ -152,6 +161,7 @@ void crank_nicolson(double alpha, mat &u, int N, int T){
         u_temp_row1 = u.row(t-1);
         forward_step(alpha/2,u_temp_row,u_temp_row1,N);
         tridiag(alpha/2,u_temp_row,N);
+        u_temp_row(0) = 0; u_temp_row(N+1) = 1;
         u.row(t) = u_temp_row;
 
       }

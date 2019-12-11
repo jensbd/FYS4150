@@ -88,7 +88,7 @@ if dim == "1":
 
                 plt.show()
 
-if dim == "2":
+elif dim == "2":
     for dx in [0.1,0.01]:
         dt = 0.2*dx*dx
         T = int(0.1/dt)
@@ -121,7 +121,7 @@ if dim == "2":
                     ax.view_init(40,angle)
                 ax.zaxis.set_major_locator(LinearLocator(10));
                 ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'));
-                plt.xlabel("x")                                         
+                plt.xlabel("x")
                 plt.ylabel("y")
                 name = "2dim_explicit: dx = "+str(dx)
                 plt.title(name)

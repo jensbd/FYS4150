@@ -22,6 +22,7 @@ void forward_euler(double, mat &, int, int);
 void forward_euler_2dim(double, cube &, int, int);
 void tridiag(double, rowvec &, int);
 void tridiag_solver(rowvec &, rowvec , int , double);
+void LU_Decomp_Arma(double, rowvec &, int);
 void backward_euler(double, mat &, int, int);
 void crank_nicolson(double, mat &, int, int);
 void g(mat &, int);
