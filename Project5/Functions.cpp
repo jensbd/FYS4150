@@ -73,70 +73,10 @@ void forward_euler_2dim(double alpha, cube &u, int N, int T){
 
 
 
-void LU_Decomp_Arma(double alpha, rowvec &u, int N){
-    // This function uses Armadillo
-    mat A = zeros<mat>(N,N);  //Creating a n x n matrix filled with zeros
-
-    // Setting up the matrix and the right-hand side vector with correct values
-    A(0,0) = 1+2*alpha;  A(0,1) = -alpha;
-    for (int i = 1; i < N-1; i++){
-     A(i,i-1)  = -alpha;
-     A(i,i)    = 1+2*alpha;
-     A(i+1,i)  = -alpha;
-    }
-    A(N-1,N-1) = 1+2*alpha; A(N-2,N-1) = -alpha;
 
 
-    // Solving u⁻1 = Au
-    vec u_temp(N);
-    for (int i = 1; i < N; i++){
-      u_temp(i-1) = u(i);
-    }
-    u_temp(N-1) = u(N);
-
-    vec BC = zeros<vec>(N);
-    BC(N-1) = alpha;
-    mat A_1 = inv(A);
-    //vec u_temp1  = solve(A, u_temp + BC);
-    vec u_temp1 = A_1*(u_temp + BC);
-
-    for (int i = 0; i < N; i++){
-      u(i+1) = u_temp1(i);
-    }
-}
 
 
-void tridiag(double alpha, rowvec &u, int N){
-    /*
-    Tridiagonal gaus-eliminator, specialized to diagonal = 1+2*alpha,
-    super- and sub- diagonal = - alpha
-    */
-    N = N + 2;
-    vec d(N);
-    d.fill(1+2*alpha);
-    vec b(N-1);
-    b.fill(- alpha);
-
-    //Forward eliminate
-    for (int i = 1; i < N-1; i++){
-        //Normalize row i (i in u convention):
-        b(i-1) /= d(i-1);
-        u(i) /= d(i-1); //Note: row i in u = row i-1 in the matrix
-        d(i-1) = 1.0;
-        //Eliminate
-        u(i+1) += u(i)*alpha;
-        d(i) += b(i-1)*alpha;
-    }
-    //Normalize bottom row
-    u(N-1) /= d(N-2);
-    d(N-2) = 1.0;
-
-    // Backward substitute
-    for (int i = N-1; i > 0; i--){ // loop from i=N to i=2
-        u(i-1) -= u(i)*b(i-1);
-        //b(i-2) = 0;
-      }
-}
 
 
 void tridiagSolver(rowvec &u, rowvec u_prev, double alpha, int N) {
@@ -217,15 +157,7 @@ void crank_nicolson(double alpha, mat &u, int N, int T){
       u.row(t) = u_temp2;
       }
 }
-/*
-void g(mat &u, int N){
-    // Initial condition u(x,0) = g(x), x \in (0,1)
-    double dx = 1.0/N;
-    for (int i = 1; i < N; i++){
-      u(0,i) = 0;
-  }
-}
-*/
+
 void analytic(mat &u, int N, int T, vec x, double dt){
   double L = 1.0;
   for (int t = 0; t < u.n_rows; t++ ){

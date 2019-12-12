@@ -13,26 +13,21 @@ dim = input("Write here: ")
 if dim == "1":
     L = 1.0
 
-    x_analytic = np.linspace(0,1,1000)
+    x_analytic = np.linspace(0,1,1002)
     t_analytic = np.linspace(0,1,1000)
     dt = 1.0/len(t_analytic)
-    u_analytic = np.zeros((len(x_analytic),len(t_analytic)))
+    u_analytic = np.zeros((len(t_analytic),len(x_analytic)))
     for i in tqdm(range(len(t_analytic))):
         u_analytic[i,:] = x_analytic/L
-        for n in range(1,1000):
+        for n in range(1,100):
             u_analytic[i] += (2*(-1)**n)/(n*np.pi)*np.sin(n*np.pi*x_analytic/L)*np.exp(-n**2*np.pi**2*t_analytic[i]/L**2)
 
 
-
+    u_list = []
+    x_list = []
+    t_list = []
     for method in ["FE:", "BE:", "CN:"]:
         for dx in [0.1, 0.01]:
-            """
-            with open ("Analytic:"+str(dx)) as file:
-                lines = file.readlines()
-                u_analytic = np.zeros((len(lines),len(lines[0].split())))
-                for i in range(len(lines)):
-                    u_analytic[i,:] = lines[i].split()
-            """
             dt = 0.5*dx*dx
             #Generate t-mesh
             t = np.zeros(int(1.0/dt))
@@ -42,6 +37,9 @@ if dim == "1":
             x = np.zeros(int(1.0/dx)+2)
             for k in range(len(x)):
                 x[k] = k*dx
+            if method == "FE:":
+                x_list.append(x)
+                t_list.append(t)
 
             with open (method+str(dx)) as file:
                 lines = file.readlines()
@@ -49,8 +47,12 @@ if dim == "1":
                 for i in range(len(lines)):
                     u[i,:] = lines[i].split()
 
+                u_list.append(u)
+
                 fig = plt.figure();
                 x,t = np.meshgrid(x,t)
+
+
                 ax = fig.gca(projection='3d');
                 # Plot the surface.
                 surf = ax.plot_surface(x, t, u, cmap=cm.coolwarm,
@@ -85,8 +87,39 @@ if dim == "1":
                     plt.ylabel("t")
                     plt.title("Analytic")
                     fig.savefig("plots/Analytic.png")
-
                 plt.show()
+    print(len(x_list),len(u_list))
+
+    for i in range(2):
+        fig = plt.figure();
+        plt.title("Numerical vs analytical solution for t = 0")
+        plt.plot(x_list[i], u_list[i][0], ".")
+        plt.plot(x_list[i], u_list[2+i][0], ".")
+        plt.plot(x_list[i], u_list[4+i][0], ".")
+        plt.plot(x_analytic, u_analytic[0])
+        plt.legend(["FE", "BE", "CN", "Analytic"])
+    plt.show()
+
+    for i in range(2):
+        fig = plt.figure();
+        plt.title("Numerical vs analytical solution for t = 0.5")
+        plt.plot(x_list[i], u_list[i][int(len(t_list[i])/2)], ".")
+        plt.plot(x_list[i], u_list[2+i][int(len(t_list[i])/2)], ".")
+        plt.plot(x_list[i], u_list[4+i][int(len(t_list[i])/2)], ".")
+        plt.plot(x_analytic, u_analytic[int(len(t_analytic)/2)])
+        plt.legend(["FE", "BE", "CN", "Analytic"])
+    plt.show()
+
+    for i in range(2):
+        fig = plt.figure();
+        plt.title("Numerical vs analytical solution for t = 1.0")
+        plt.plot(x_list[i], u_list[i][len(t_list[i])-1], ".")
+        plt.plot(x_list[i], u_list[2+i][len(t_list[i])-1], ".")
+        plt.plot(x_list[i], u_list[4+i][len(t_list[i])-1], ".")
+        plt.plot(x_analytic, u_analytic[len(t_analytic)-1])
+        plt.legend(["FE", "BE", "CN", "Analytic"])
+    plt.show()
+
 
 elif dim == "2":
     for dx in [0.1,0.01]:
