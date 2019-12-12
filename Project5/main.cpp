@@ -107,6 +107,7 @@ if (Method == "FE"){
   Method = "BE";
 
 }
+
 if (Method == "BE"){
   mat ub = u;
   backward_euler(alpha,ub,N,T);
@@ -118,6 +119,8 @@ if (Method == "BE"){
   Method = "CN";
 
 }
+
+
 if (Method == "CN"){
   mat uc = u;
   crank_nicolson(alpha, uc, N, T);

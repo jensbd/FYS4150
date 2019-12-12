@@ -71,37 +71,7 @@ void forward_euler_2dim(double alpha, cube &u, int N, int T){
       }
 }
 
-void tridiag(double alpha, rowvec &u, int N){
-    /*
-    Tridiagonal gaus-eliminator, specialized to diagonal = 1+2*alpha,
-    super- and sub- diagonal = - alpha
-    */
-    N = N + 2;
-    vec d(N);
-    d.fill(1+2*alpha);
-    vec b(N-1);
-    b.fill(- alpha);
 
-    //Forward eliminate
-    for (int i = 1; i < N-1; i++){
-        //Normalize row i (i in u convention):
-        b(i-1) /= d(i-1);
-        u(i) /= d(i-1); //Note: row i in u = row i-1 in the matrix
-        d(i-1) = 1.0;
-        //Eliminate
-        u(i+1) += u(i)*alpha;
-        d(i) += b(i-1)*alpha;
-    }
-    //Normalize bottom row
-    u(N-1) /= d(N-2);
-    d(N-2) = 1.0;
-
-    // Backward substitute
-    for (int i = N-1; i > 0; i--){ // loop from i=N to i=2
-        u(i-1) -= u(i)*b(i-1);
-        //b(i-2) = 0;
-      }
-}
 
 void LU_Decomp_Arma(double alpha, rowvec &u, int N){
     // This function uses Armadillo
@@ -135,18 +105,91 @@ void LU_Decomp_Arma(double alpha, rowvec &u, int N){
     }
 }
 
+
+void tridiag(double alpha, rowvec &u, int N){
+    /*
+    Tridiagonal gaus-eliminator, specialized to diagonal = 1+2*alpha,
+    super- and sub- diagonal = - alpha
+    */
+    N = N + 2;
+    vec d(N);
+    d.fill(1+2*alpha);
+    vec b(N-1);
+    b.fill(- alpha);
+
+    //Forward eliminate
+    for (int i = 1; i < N-1; i++){
+        //Normalize row i (i in u convention):
+        b(i-1) /= d(i-1);
+        u(i) /= d(i-1); //Note: row i in u = row i-1 in the matrix
+        d(i-1) = 1.0;
+        //Eliminate
+        u(i+1) += u(i)*alpha;
+        d(i) += b(i-1)*alpha;
+    }
+    //Normalize bottom row
+    u(N-1) /= d(N-2);
+    d(N-2) = 1.0;
+
+    // Backward substitute
+    for (int i = N-1; i > 0; i--){ // loop from i=N to i=2
+        u(i-1) -= u(i)*b(i-1);
+        //b(i-2) = 0;
+      }
+}
+
+
+void tridiagSolver(rowvec &u, rowvec u_prev, double alpha, int N) {
+  /*
+  * Thomas algorithm:
+  * Solves matrix vector equation Au = b,
+  * for A being a tridiagonal matrix with constant
+  * elements diag on main diagonal and offdiag on the off diagonals.
+  */
+ double diag, offdiag;
+ diag = 1+2*alpha; offdiag = -alpha;
+ vec beta = zeros<vec>(N+1); beta(0) = diag;
+ vec u_old = zeros<vec>(N+1); u_old(0) = u_prev(0);
+ double btemp;
+
+
+ // Forward substitution
+ for(int i = 1; i < N+1; i++){
+   btemp = offdiag/beta[i-1];
+   beta(i) = diag - offdiag*btemp;
+   u_old(i) = u_prev(i) - u_old(i-1)*btemp;
+ }
+
+
+ // Special case, boundary conditions
+ u(0) = 0;
+ u(N+1) = 1;
+
+ // backward substitution
+ for(int i=N; i>0; i--){
+   u(i) = (u_old(i) - offdiag*u(i+1))/beta(i);
+  }
+
+}
+
+
+
+
+
 void backward_euler(double alpha, mat &u, int N, int T){
     /*
     Implements backward euler scheme by gaus-elimination of tridiagonal matrix.
     Results are saved to u.
     */
-    rowvec u_temp_row;
+    rowvec u_temp;
     for (int t = 1; t < T; t++){
         //u.row(t) = u.row(t-1); // .copy() ?
-        u_temp_row = u.row(t-1);
-        tridiag(alpha,u_temp_row, N); //Note: Passing a pointer to row t, which is modified in-place
-        u_temp_row(0) = 0; u_temp_row(N+1) = 1;
-        u.row(t) = u_temp_row;
+        //u_temp_row = u.row(t-1);
+        //tridiag(alpha,u_temp_row,N); //Note: Passing a pointer to row t, which is modified in-place
+        //u_temp_row(0) = 0; u_temp_row(N+1) = 1;
+        u_temp = u.row(t);
+        tridiagSolver(u_temp, u.row(t-1), alpha, N); //Note: Passing a pointer to row t, which is modified in-place
+        u.row(t) = u_temp;
       }
 }
 
@@ -154,16 +197,24 @@ void crank_nicolson(double alpha, mat &u, int N, int T){
     /*
     Implents crank-nicolson scheme, reusing code from forward- and backward euler
     */
-    rowvec u_temp_row;
-    rowvec u_temp_row1;
+    rowvec u_temp;
+    rowvec u_temp1;
+    rowvec u_temp2;
     for (int t = 1; t < T; t++){
+      /*
         u_temp_row = u.row(t);
         u_temp_row1 = u.row(t-1);
         forward_step(alpha/2,u_temp_row,u_temp_row1,N);
         tridiag(alpha/2,u_temp_row,N);
         u_temp_row(0) = 0; u_temp_row(N+1) = 1;
         u.row(t) = u_temp_row;
-
+        */
+      u_temp = u.row(t-1);
+      u_temp1 = u.row(t);
+      forward_step(alpha/2, u_temp1, u_temp, N);
+      u_temp2 = u.row(t);
+      tridiagSolver(u_temp2, u_temp1, alpha, N);
+      u.row(t) = u_temp2;
       }
 }
 /*
