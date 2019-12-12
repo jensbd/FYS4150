@@ -30,13 +30,15 @@ if dim == "1":
         for dx in [0.1, 0.01]:
             dt = 0.5*dx*dx
             #Generate t-mesh
-            t = np.zeros(int(1.0/dt))
+            T = int(1.0/dt) #Number of time steps till final time
+            t = np.zeros(T)
             for l in range(len(t)):
                 t[l] = l*dt
             #Generate x-mesh
-            x = np.zeros(int(1.0/dx)+2)
+            N = int(1.0/dx)   #Number of integration points along x-axis (inner points only)
+            x = np.zeros(N+2)
             for k in range(len(x)):
-                x[k] = k*dx
+                x[k] = k/(N+1)
             if method == "FE:":
                 x_list.append(x)
                 t_list.append(t)
@@ -88,7 +90,6 @@ if dim == "1":
                     plt.title("Analytic")
                     fig.savefig("plots/Analytic.png")
                 plt.show()
-    print(len(x_list),len(u_list))
 
     for i in range(2):
         fig = plt.figure();

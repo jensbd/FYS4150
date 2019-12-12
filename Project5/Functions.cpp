@@ -123,10 +123,6 @@ void backward_euler(double alpha, mat &u, int N, int T){
     */
     rowvec u_temp;
     for (int t = 1; t < T; t++){
-        //u.row(t) = u.row(t-1); // .copy() ?
-        //u_temp_row = u.row(t-1);
-        //tridiag(alpha,u_temp_row,N); //Note: Passing a pointer to row t, which is modified in-place
-        //u_temp_row(0) = 0; u_temp_row(N+1) = 1;
         u_temp = u.row(t);
         tridiagSolver(u_temp, u.row(t-1), alpha, N); //Note: Passing a pointer to row t, which is modified in-place
         u.row(t) = u_temp;
@@ -141,14 +137,6 @@ void crank_nicolson(double alpha, mat &u, int N, int T){
     rowvec u_temp1;
     rowvec u_temp2;
     for (int t = 1; t < T; t++){
-      /*
-        u_temp_row = u.row(t);
-        u_temp_row1 = u.row(t-1);
-        forward_step(alpha/2,u_temp_row,u_temp_row1,N);
-        tridiag(alpha/2,u_temp_row,N);
-        u_temp_row(0) = 0; u_temp_row(N+1) = 1;
-        u.row(t) = u_temp_row;
-        */
       u_temp = u.row(t-1);
       u_temp1 = u.row(t);
       forward_step(alpha/2, u_temp1, u_temp, N);
@@ -168,51 +156,68 @@ void analytic(mat &u, int N, int T, vec x, double dt){
 }
 
 
+void analytic_2D(mat &u, double dx, double dt){
+  /*
+   * Analytic solution for the two dimensional diffusion equation at a
+   * given time. Boundary conditions are all equal to zero. A "sine-paraboloid"
+   * which is centered in the middle of the medium is the initial condition.
+   * Boundary conditions are zeros.
+   */
+  double L = 1.0;
+  int N = int(1/dx);   // Number of integration points along x & y -axis (inner points only)
+  int T = int(1/dt);   // Number of time steps till final time
+  vec x = linspace<vec>(0,1,N+2);
+
+
+  for (int t = 0; t < u.n_rows; t++){
+    for (int i = 0; i < u.n_cols; i++){
+      u(t,i) = x(i)/L - (2.0/(pi))*sin(x(i)*pi/L)*exp(-pi*pi*t*dt/(L*L));
+    }
+  }
+}
+
+
 
 // Function for setting up the iterative Jacobi solver
-int JacobiSolver(int N, double dx, double dt, mat &A, mat &q, double abstol)
-{
+int JacobiSolver(mat &u, double dx, double dt, double abstol){
+
+  mat u_prev = u;
+
+// Constants, variables
   int MaxIterations = 100000;
-  mat Aold = zeros<mat>(N,N);
+  int N = int(1/dx);   // Number of integration points along x & y -axis (inner points only)
+  int T = int(1/dt);   // Number of time steps till final time
 
-  double D = dt/(dx*dx);
+  double alpha = dt/(dx*dx);
+  double factor = 1.0/(1.0 + 4*alpha);
+  double factor_a = alpha*factor;
+  double scale = (N+2)*(N+2);
+  double delta;
+//  #pragma omp parallel default(shared) private (i,j) reduction(+:sum)
 
-  for(int i=1;  i < N-1; i++)
-    for(int j=1; j < N-1; j++)
-      Aold(i,j) = 1.0;
+// Time loop
+//#pragma omp for
+for (int t = 1; t < T; t++){
+  int iterations = 0;
+  double diff=1;
+  mat u_guess = ones<mat>(N+2,N+2);
 
-  // Boundary Conditions -- all zeros
-  for(int i=0; i < N; i++){
-    A(0,i) = 0.0;
-    A(N-1,i) = 0.0;
-    A(i,0) = 0.0;
-    A(i,N-1) = 0.0;
-  }
-  // Start the iterative solver
-  int i, j;
-  double sum = 0.0;
-  for(int k = 0; k < MaxIterations; k++){
-    #pragma omp parallel default(shared) private (i,j) reduction(+:sum)
-    #pragma omp for
-    for( i = 1; i < N-1; i++){
-      for(  j=1; j < N-1; j++){
-	A(i,j) = dt*q(i,j) + Aold(i,j) +
-	  D*(Aold(i+1,j) + Aold(i,j+1) - 4.0*Aold(i,j) +
-	     Aold(i-1,j) + Aold(i,j-1));
+  while (iterations < MaxIterations && diff > abstol){
+    diff = 0;
+    // Loop over all inner elements, will converge towards solution
+    for (int j = 1; j < N; j++) {
+      for (int i = 1; i < N; i++) {
+        // u_guess is the previous u, which also work for a random guess
+        delta = (u_guess(i,j+1)+u_guess(i,j-1)+u_guess(i+1,j)+u_guess(i-1,j));
+        u(i,j) = factor_a*delta + factor*u_prev(i,j);
+        diff += fabs(u(i,j) - u_guess(i,j));
       }
-    }
-     sum = 0.0;
-    for(int i = 0; i < N;i++){
-      for(int j = 0; j < N;j++){
-	sum += (Aold(i,j)-A(i,j))*(Aold(i,j)-A(i,j));
-	Aold(i,j) = A(i,j);
-      }
-    }
-    if(sqrt (sum) <abstol){
-      return k;
-    }
-  }
-  cout << "Jacobi: Maximum Number of Interations Reached Without Convergence\n";
-  return MaxIterations;
+    } // end of double for loop
+    u_guess = u;
+    diff /= scale;
+    iterations++;
+  } // end iteration loop
+  u_prev = u;
+} // end time loop
 
 }

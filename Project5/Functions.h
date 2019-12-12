@@ -24,7 +24,8 @@ void tridiagSolver(rowvec &, rowvec, double, int);
 void backward_euler(double, mat &, int, int);
 void crank_nicolson(double, mat &, int, int);
 void analytic(mat &, int, int, vec, double);
-int JacobiSolver(int, double, double, mat &, mat &, double);
+void analytic_2D(mat &, double, double);
+int JacobiSolver(mat &, double, double, double);
 
 
 #endif

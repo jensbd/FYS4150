@@ -20,7 +20,7 @@ int main(int argc, char* argv[]){
   cout << "\n" << "Project 5 - 1-dim: " <<  "Write 1 " << endl;
   cout << "\n" << "Project 5 - 2-dim: " <<  "Write 2 " << endl;
 
-
+  double PI = 4*atan(1);
 
   cout << "\n" << "Write here " << endl;
   string Dimension;
@@ -105,7 +105,7 @@ if (Method == "FE"){
   ofile << uf;
   ofile.close();
   Method = "BE";
-
+  cout << "Forward Euler \n" << max(uf) << endl;
 }
 
 if (Method == "BE"){
@@ -117,6 +117,7 @@ if (Method == "BE"){
   ofile << ub;
   ofile.close();
   Method = "CN";
+  cout << "Backward Euler \n" << max(ub) << endl;
 
 }
 
@@ -129,6 +130,8 @@ if (Method == "CN"){
   ofile.open(file);
   ofile << uc;
   ofile.close();
+  cout << "Crank Nicolson \n" << max(uc) << endl;
+
 }
 cout << "Text files generated" << endl;
 
@@ -165,7 +168,7 @@ int N = int(1.0/(dx));
 int T = int(0.1/dt);
 
 
-cube u = zeros<cube>(N+2,N+2,T);
+cube u = zeros<cube>(N+2, N+2, T);
 cube u_analytic = zeros<cube>(N+2,N+2,T);
 //Boundary conditions
 for (int t = 0; t < T; t++){
@@ -173,6 +176,8 @@ for (int t = 0; t < T; t++){
     u(n,N+1,t) = 1.0;
   }
 }
+
+
 forward_euler_2dim(alpha,u,N,T);
 
 string file = "2dim_explicit:"+to_string(dx);
@@ -182,41 +187,48 @@ for (int t = 0; t < T; t++){
   ofile << u.slice(t);
 }
 ofile.close();
-/*
-double PI = 4*atan(1);
+
+// Initial conditions
+mat u_implicit = zeros<mat>(T, N+2);
+for (double i = 1; i < N; i++) {
+  for (double j = 1; j < N; j++) {
+    u_implicit(i,j) = sin(i*PI/(double)N)*sin(j*PI/(double)N);
+  }
+}
+
+
+//Boundary conditions
+for (int t = 0; t < T; t++){
+  u_implicit(t,N+1) = 1.0;
+}
 
 
 double ExactSolution;
 double tolerance = 1.0e-10;
-mat A = zeros<mat>(N,N);
-mat q = zeros<mat>(N,N);
 
-// setting up an additional source term
-  for(int i = 0; i < N; i++){
-    for(int j = 0; j < N; j++){
-      q(i,j) = -2.0*PI*PI*sin(PI*dx*i)*sin(PI*dx*j);
-    }
-}
-  double start = omp_get_wtime();
-  int itcount = JacobiSolver(N,dx,dt,A,q,tolerance);
-  double end = omp_get_wtime();
-  double comptime = end-start;
-  cout << "Time used for Jacobis method: " << comptime << " s" << endl;
-  // Testing against exact solution
-  double sum = 0.0;
-  for(int i = 0; i < N; i++){
-    for(int j=0;j < N; j++){
-      ExactSolution = -sin(PI*dx*i)*sin(PI*dx*j);
-      sum += fabs((A(i,j) - ExactSolution));
-    }
+double start = omp_get_wtime();
+int itcount = JacobiSolver(u_implicit, dx, dt, tolerance);
+double end = omp_get_wtime();
+double comptime = end-start;
+cout << "Time used for Jacobis method: " << comptime << " s" << endl;
+cout << "Jacobi Iterative Solver \n" << u_implicit << endl;
+/*
+// Testing against exact solution
+double sum = 0.0;
+for(int i = 0; i < N; i++){
+  for(int j=0;j < N; j++){
+    ExactSolution = -sin(PI*dx*i)*sin(PI*dx*j);
+    sum += fabs((u_implicit(i,j) - ExactSolution));
   }
-  cout << setprecision(5) << setiosflags(ios::scientific);
-  cout << "Jacobi method with error " << sum/N<< " in " << itcount << " iterations" << endl;
-*/
 }
 
+cout << setprecision(5) << setiosflags(ios::scientific);
+cout << "Jacobi method with error " << sum/N<< " in " << itcount << " iterations" << endl;
+*/
 
+
+
+}
 
   return 0;
-
 }
