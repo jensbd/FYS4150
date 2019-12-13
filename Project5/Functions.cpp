@@ -8,16 +8,21 @@
 
 double pi = 4*atan(1); // This is the constant pi
 
-void forward_step(double alpha, rowvec &u, rowvec &uPrev, int N){
+void forward_step(double alpha, rowvec &u, rowvec &uPrev, int N, bool CN){
     /*
     Steps forward-euler algo one step ahead.
     Implemented in a separate function for code-reuse from crank_nicolson()
     */
-
-    for (int i = 1; i < N+1; i++){ //loop from i=1 to i=N
+    if (CN == false){
+      for (int i = 1; i < N+1; i++){ //loop from i=1 to i=N
         u(i) = alpha*uPrev(i-1) + (1.0-2*alpha)*uPrev(i) + alpha*uPrev(i+1);
       }
-    //return u;
+  }
+    if (CN == true){
+      for (int i = 1; i < N+1; i++){ //loop from i=1 to i=N
+        u(i) = alpha*uPrev(i-1) + (2.0-2*alpha)*uPrev(i) + alpha*uPrev(i+1);
+      }
+  }
 }
 
 void forward_step_2dim(double alpha, mat &u, mat &uPrev, int N){
@@ -46,7 +51,7 @@ void forward_euler(double alpha, mat &u, int N, int T){
         u_temp_row = u.row(t);
         u_temp_row1 = u.row(t-1);
 
-        forward_step(alpha,u_temp_row,u_temp_row1,N);
+        forward_step(alpha,u_temp_row,u_temp_row1,N,false);
         u.row(t) = u_temp_row;
 
       }
@@ -75,11 +80,7 @@ void forward_euler_2dim(double alpha, cube &u, int N, int T){
 
 
 
-
-
-
-
-void tridiagSolver(rowvec &u, rowvec u_prev, double alpha, int N) {
+void tridiagSolver(rowvec &u, rowvec u_prev, double alpha, int N, bool CN) {
   /*
   * Thomas algorithm:
   * Solves matrix vector equation Au = b,
@@ -87,7 +88,15 @@ void tridiagSolver(rowvec &u, rowvec u_prev, double alpha, int N) {
   * elements diag on main diagonal and offdiag on the off diagonals.
   */
  double diag, offdiag;
- diag = 1+2*alpha; offdiag = -alpha;
+ if (CN == false){
+   diag = 1+2*alpha;
+}
+
+ if (CN == true){
+  diag = 2+2*alpha;
+}
+
+ offdiag = -alpha;
  vec beta = zeros<vec>(N+1); beta(0) = diag;
  vec u_old = zeros<vec>(N+1); u_old(0) = u_prev(0);
  double btemp;
@@ -106,7 +115,7 @@ void tridiagSolver(rowvec &u, rowvec u_prev, double alpha, int N) {
  u(N+1) = 1;
 
  // backward substitution
- for(int i=N; i>0; i--){
+ for(int i=N; i>1; i--){
    u(i) = (u_old(i) - offdiag*u(i+1))/beta(i);
   }
 
@@ -124,7 +133,7 @@ void backward_euler(double alpha, mat &u, int N, int T){
     rowvec u_temp;
     for (int t = 1; t < T; t++){
         u_temp = u.row(t);
-        tridiagSolver(u_temp, u.row(t-1), alpha, N); //Note: Passing a pointer to row t, which is modified in-place
+        tridiagSolver(u_temp, u.row(t-1), alpha, N, false); //Note: Passing a pointer to row t, which is modified in-place
         u.row(t) = u_temp;
       }
 }
@@ -139,9 +148,13 @@ void crank_nicolson(double alpha, mat &u, int N, int T){
     for (int t = 1; t < T; t++){
       u_temp = u.row(t-1);
       u_temp1 = u.row(t);
-      forward_step(alpha/2, u_temp1, u_temp, N);
+      forward_step(alpha, u_temp1, u_temp, N, true);
+
+      u_temp1(0) = 0;
+      u_temp1(N+1) = 1;
+
       u_temp2 = u.row(t);
-      tridiagSolver(u_temp2, u_temp1, alpha, N);
+      tridiagSolver(u_temp2, u_temp1, alpha, N, true);
       u.row(t) = u_temp2;
       }
 }
@@ -180,6 +193,11 @@ void analytic_2D(mat &u, double dx, double dt){
 
 // Function for setting up the iterative Jacobi solver
 int JacobiSolver(mat &u, double dx, double dt, double abstol){
+  ofstream ofile;
+  string file = "2dim_implicit:"+to_string(dx);
+  file.erase ( file.find_last_not_of('0') + 1, std::string::npos );
+  ofile.open(file);
+  ofile << u;
 
   mat u_prev = u;
 
@@ -193,31 +211,36 @@ int JacobiSolver(mat &u, double dx, double dt, double abstol){
   double factor_a = alpha*factor;
   double scale = (N+2)*(N+2);
   double delta;
-//  #pragma omp parallel default(shared) private (i,j) reduction(+:sum)
+  double diff;
+  int i,j;
+
 
 // Time loop
+//#pragma omp parallel default(shared) private (i,j) reduction(+:diff)
 //#pragma omp for
 for (int t = 1; t < T; t++){
   int iterations = 0;
-  double diff=1;
+  diff=1;
   mat u_guess = ones<mat>(N+2,N+2);
 
   while (iterations < MaxIterations && diff > abstol){
     diff = 0;
+    // Define parallel region
     // Loop over all inner elements, will converge towards solution
-    for (int j = 1; j < N; j++) {
-      for (int i = 1; i < N; i++) {
+    for (j = 1; j < N+1; j++) {
+      for (i = 1; i < N+1; i++) {
         // u_guess is the previous u, which also work for a random guess
         delta = (u_guess(i,j+1)+u_guess(i,j-1)+u_guess(i+1,j)+u_guess(i-1,j));
         u(i,j) = factor_a*delta + factor*u_prev(i,j);
         diff += fabs(u(i,j) - u_guess(i,j));
-      }
-    } // end of double for loop
+          }
+        } // end of double for loop
     u_guess = u;
     diff /= scale;
     iterations++;
-  } // end iteration loop
+    }  // end iteration loop
   u_prev = u;
-} // end time loop
-
+  ofile << u;
+  } // end time loop
+ofile.close();
 }

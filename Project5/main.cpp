@@ -105,7 +105,6 @@ if (Method == "FE"){
   ofile << uf;
   ofile.close();
   Method = "BE";
-  cout << "Forward Euler \n" << max(uf) << endl;
 }
 
 if (Method == "BE"){
@@ -117,7 +116,6 @@ if (Method == "BE"){
   ofile << ub;
   ofile.close();
   Method = "CN";
-  cout << "Backward Euler \n" << max(ub) << endl;
 
 }
 
@@ -130,7 +128,6 @@ if (Method == "CN"){
   ofile.open(file);
   ofile << uc;
   ofile.close();
-  cout << "Crank Nicolson \n" << max(uc) << endl;
 
 }
 cout << "Text files generated" << endl;
@@ -165,7 +162,7 @@ double alpha = dt/dx/dx;
 int N = int(1.0/(dx));
 
 // Number of time steps till final time
-int T = int(0.1/dt);
+int T = int(1.0/dt);
 
 
 cube u = zeros<cube>(N+2, N+2, T);
@@ -173,10 +170,17 @@ cube u_analytic = zeros<cube>(N+2,N+2,T);
 //Boundary conditions
 for (int t = 0; t < T; t++){
   for (int n = 0; n < N+2; n++){
-    u(n,N+1,t) = 1.0;
+    u(n,N+1,t) = 0.0;
+    u(N+1,n,t) = 0.0;
   }
 }
 
+// Initial conditions
+  for (double i = 1; i < N+1; i++) {
+    for (double j =1; j < N+1; j++) {
+      u(i,j,0) = sin(i*PI/(double)N)*sin(j*PI/(double)N);
+    }
+  }
 
 forward_euler_2dim(alpha,u,N,T);
 
@@ -188,30 +192,35 @@ for (int t = 0; t < T; t++){
 }
 ofile.close();
 
-// Initial conditions
-mat u_implicit = zeros<mat>(T, N+2);
-for (double i = 1; i < N; i++) {
-  for (double j = 1; j < N; j++) {
-    u_implicit(i,j) = sin(i*PI/(double)N)*sin(j*PI/(double)N);
-  }
-}
 
 
+mat u_implicit = zeros<mat>(N+2, N+2);
+
+
+// Implement boundaries rigidly
+// Boundary condition for endpoints is already zero
 //Boundary conditions
-for (int t = 0; t < T; t++){
-  u_implicit(t,N+1) = 1.0;
+for (int n = 0; n < N+2; n++){
+  u_implicit(n, N+1) = 0.0;
+  u_implicit(N+1, n) = 0.0;
 }
+// Initial conditions
+  for (double i = 1; i < N+1; i++) {
+    for (double j =1; j < N+1; j++) {
+      u_implicit(i,j) = sin(i*PI/(double)N)*sin(j*PI/(double)N);
+    }
+  }
 
 
 double ExactSolution;
-double tolerance = 1.0e-10;
+double tolerance = 1.0e-8;
 
 double start = omp_get_wtime();
 int itcount = JacobiSolver(u_implicit, dx, dt, tolerance);
 double end = omp_get_wtime();
 double comptime = end-start;
 cout << "Time used for Jacobis method: " << comptime << " s" << endl;
-cout << "Jacobi Iterative Solver \n" << u_implicit << endl;
+
 /*
 // Testing against exact solution
 double sum = 0.0;

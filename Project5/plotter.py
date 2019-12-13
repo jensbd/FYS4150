@@ -90,10 +90,10 @@ if dim == "1":
                     plt.title("Analytic")
                     fig.savefig("plots/Analytic.png")
                 plt.show()
-
+    dx = [0.1, 0.01]
     for i in range(2):
         fig = plt.figure();
-        plt.title("Numerical vs analytical solution for t = 0")
+        plt.title("Numerical vs Analytical solution for t = 0 \n dx = %g" % (dx[i]))
         plt.plot(x_list[i], u_list[i][0], ".")
         plt.plot(x_list[i], u_list[2+i][0], ".")
         plt.plot(x_list[i], u_list[4+i][0], ".")
@@ -103,7 +103,7 @@ if dim == "1":
 
     for i in range(2):
         fig = plt.figure();
-        plt.title("Numerical vs analytical solution for t = 0.5")
+        plt.title("Numerical vs analytical solution for t = 0.5 \n dx = %g" % (dx[i]))
         plt.plot(x_list[i], u_list[i][int(len(t_list[i])/2)], ".")
         plt.plot(x_list[i], u_list[2+i][int(len(t_list[i])/2)], ".")
         plt.plot(x_list[i], u_list[4+i][int(len(t_list[i])/2)], ".")
@@ -113,7 +113,7 @@ if dim == "1":
 
     for i in range(2):
         fig = plt.figure();
-        plt.title("Numerical vs analytical solution for t = 1.0")
+        plt.title("Numerical vs analytical solution for t = 1.0 \n dx = %g" % (dx[i]))
         plt.plot(x_list[i], u_list[i][len(t_list[i])-1], ".")
         plt.plot(x_list[i], u_list[2+i][len(t_list[i])-1], ".")
         plt.plot(x_list[i], u_list[4+i][len(t_list[i])-1], ".")
