@@ -115,7 +115,7 @@ void tridiagSolver(rowvec &u, rowvec u_prev, double alpha, int N, bool CN) {
  u(N+1) = 1;
 
  // backward substitution
- for(int i=N; i>1; i--){
+ for(int i = N; i > 0; i--){
    u(i) = (u_old(i) - offdiag*u(i+1))/beta(i);
   }
 
@@ -131,9 +131,13 @@ void backward_euler(double alpha, mat &u, int N, int T){
     Results are saved to u.
     */
     rowvec u_temp;
+    rowvec u_temp1;
     for (int t = 1; t < T; t++){
         u_temp = u.row(t);
-        tridiagSolver(u_temp, u.row(t-1), alpha, N, false); //Note: Passing a pointer to row t, which is modified in-place
+        u_temp1 = u.row(t-1);
+        tridiagSolver(u_temp, u_temp1, alpha, N, false); //Note: Passing a pointer to row t, which is modified in-place
+        u_temp(0) = 0;
+        u_temp(N+1) = 1;
         u.row(t) = u_temp;
       }
 }
@@ -155,6 +159,8 @@ void crank_nicolson(double alpha, mat &u, int N, int T){
 
       u_temp2 = u.row(t);
       tridiagSolver(u_temp2, u_temp1, alpha, N, true);
+      u_temp2(0) = 0;
+      u_temp2(N+1) = 1;
       u.row(t) = u_temp2;
       }
 }

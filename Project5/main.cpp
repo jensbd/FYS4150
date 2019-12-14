@@ -162,7 +162,7 @@ double alpha = dt/dx/dx;
 int N = int(1.0/(dx));
 
 // Number of time steps till final time
-int T = int(1.0/dt);
+int T = int(1/dt);
 
 
 cube u = zeros<cube>(N+2, N+2, T);
