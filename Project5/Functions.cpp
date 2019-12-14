@@ -202,7 +202,7 @@ int JacobiSolver(mat &u, double dx, double dt, double abstol){
   mat u_prev = u;
 
 // Constants, variables
-  int MaxIterations = 100000;
+  int MaxIterations = 100000; // Max number of iterations
   int N = int(1/dx);   // Number of integration points along x & y -axis (inner points only)
   int T = int(1/dt);   // Number of time steps till final time
 
@@ -216,8 +216,8 @@ int JacobiSolver(mat &u, double dx, double dt, double abstol){
 
 
 // Time loop
-//#pragma omp parallel default(shared) private (i,j) reduction(+:diff)
-//#pragma omp for
+// Parallelization using openmp
+//#pragma omp parallel for
 for (int t = 1; t < T; t++){
   int iterations = 0;
   diff=1;

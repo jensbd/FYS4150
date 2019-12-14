@@ -182,7 +182,15 @@ for (int t = 0; t < T; t++){
     }
   }
 
+double Total_start = omp_get_wtime();
+
+
+double start = omp_get_wtime();
 forward_euler_2dim(alpha,u,N,T);
+double end = omp_get_wtime();
+double comptime = end-start;
+cout << "Time used for 2-dim Forward-Euler method: " << comptime << " s" << endl;
+
 
 string file = "2dim_explicit:"+to_string(dx);
 file.erase ( file.find_last_not_of('0') + 1, std::string::npos );
@@ -215,28 +223,15 @@ for (int n = 0; n < N+2; n++){
 double ExactSolution;
 double tolerance = 1.0e-8;
 
-double start = omp_get_wtime();
+start = omp_get_wtime();
 int itcount = JacobiSolver(u_implicit, dx, dt, tolerance);
-double end = omp_get_wtime();
-double comptime = end-start;
+end = omp_get_wtime();
+comptime = end-start;
 cout << "Time used for Jacobis method: " << comptime << " s" << endl;
 
-/*
-// Testing against exact solution
-double sum = 0.0;
-for(int i = 0; i < N; i++){
-  for(int j=0;j < N; j++){
-    ExactSolution = -sin(PI*dx*i)*sin(PI*dx*j);
-    sum += fabs((u_implicit(i,j) - ExactSolution));
-  }
-}
-
-cout << setprecision(5) << setiosflags(ios::scientific);
-cout << "Jacobi method with error " << sum/N<< " in " << itcount << " iterations" << endl;
-*/
-
-
-
+double Total_end = omp_get_wtime();
+double Total_comptime = Total_end - Total_start;
+cout << "Total time used for 2-dim implementation: " << Total_comptime << " s" << endl;
 }
 
   return 0;
