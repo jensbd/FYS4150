@@ -71,9 +71,9 @@ int main(int argc, char* argv[]){
 
 
   // Analytical solution to the diffusion equation
-  int infty = 1000; // what is defined as numerical "infinity".
+  int Max = 100; // what is defined as numerical "infinity".
 
-  analytic(u_analytic, N, T, infty);
+  analytic(u_analytic, N, T, Max);
 
 
   cout << "\n" << "The methods you are executing to solve the diffusion equation are: " << endl;
@@ -134,7 +134,15 @@ cout << "Text files generated" << endl;
 
   if (Dimension == "2"){
 
+cout << "\n" << "Which Task of the 2-Dim case do you want to run?: " << endl;
+cout << "\n" << "Task: Implicit & Explicit - Mandatory: " <<  "Write 1 " << endl;
+cout << "\n" << "Task: Litoshpere - Optional: " <<  "Write 2 " << endl;
 
+cout << "\n" << "Write here " << endl;
+string Task;
+cin >> Task;
+
+if (Task == "1"){
 
 cout << "\n" << "Choose step size for Delta x,y: " << endl;
 cout << "\n" << "Delta x,y = 0.1: " <<  "Write 0.1 " << endl;
@@ -156,17 +164,6 @@ int N = int(1.0/(dx));
 
 // Number of time steps till final time
 int T = int(1/dt);
-
-
-cout << "\n" << "Which Task of the 2-Dim case do you want to run?: " << endl;
-cout << "\n" << "Task: Implicit & Explicit - Mandatory: " <<  "Write 1 " << endl;
-cout << "\n" << "Task: Litoshpere - Optional: " <<  "Write 2 " << endl;
-
-cout << "\n" << "Write here " << endl;
-string Task;
-cin >> Task;
-
-if (Task == "1"){
 
 
 // Analytical solution to the diffusion equation
@@ -240,11 +237,12 @@ for (int n = 0; n < N+2; n++){
   }
 
 
-double ExactSolution;
-double tolerance = 1.0e-8;
+double tolerance = 1e-10; // tolerance for convergence in Jacobi method
+int maxiter = 10000; // Max no. of iterations each time step in Jacobi Method
+
 
 start = omp_get_wtime();
-int itcount = JacobiSolver(u_implicit, dx, dt, tolerance);
+int itcount = JacobiSolver(u_implicit, dx, dt, tolerance, maxiter);
 end = omp_get_wtime();
 comptime = end-start;
 cout << "Time used for Jacobis method: " << comptime << " s" << endl;
@@ -256,10 +254,26 @@ cout << "Total time used for 2-dim implementation: " << Total_comptime << " s" <
   }
 
 
-  if (Task == "2"){
-    // Defining variables for the function
-    int Case = 2;
-    Lithosphere(Case, dx, dt);
+if (Task == "2"){
+  // Defining variables for the function
+  double dx = 0.01; // step length [1.2 km]: 0.01*[1.2 km]*100 points = 120 km
+  double dt = 0.01; // 1 = [10^9 yr]: 100*dt = 1 Ga
+  double tolerance = 1e-10; // tolerance for convergence in Jacobi method
+  int maxiter = 10000; // Max no. of iterations each time step in Jacobi Method
+
+
+  cout << "\n" << "Which Case of the Lithosphere do you want to run?: " << endl;
+  cout << "\n" << "Lithosphere with no heat production " <<  "Write '1' " << endl;
+  cout << "\n" << "Lithosphere with heat production: " <<  "Write '2' " << endl;
+  cout << "\n" << "Lithosphere with enrichment and no decay: " <<  "Write '3' " << endl;
+  cout << "\n" << "Lithosphere with enrichment with decay: " <<  "Write '4' " << endl;
+
+
+  cout << "\n" << "Write here " << endl;
+  int Case;
+  cin >> Case;
+
+  Lithosphere(Case, dx, dt, tolerance, maxiter);
 
   }
 }

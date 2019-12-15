@@ -132,6 +132,7 @@ elif dim == "2":
     dt = 1.0/len(t_analytic)
     u_analytic = np.zeros((len(t_analytic),len(x_analytic),len(y_analytic)))
     for i in tqdm(range(len(t_analytic))):
+        u_analytic1 = u_analytic[i]
         for j in range(len(x_analytic)):
             u_analytic[i,j] = np.sin(np.pi*x_analytic[j])*np.sin(np.pi*y_analytic)*np.exp(-2*np.pi**2*t_analytic[i])
 
@@ -187,14 +188,14 @@ elif dim == "2":
 
 
 
-""" FIX PLOTTING AV ANALYTISK; LEGG ANALYTISK I C++"""
+# FIX PLOTTING AV ANALYTISK; LEGG ANALYTISK I C++
 
                 if iteration == 0:
                     fig = plt.figure()
-                    x_a,y_a = np.meshgrid(x_analytic,t_analytic)
+                    x_a,y_a = np.meshgrid(x_analytic,y_analytic)
                     ax = fig.gca(projection='3d');
                     # Plot the surface.
-                    surf = ax.plot_surface(x_a, y_a, u_analytic, cmap=cm.coolwarm,
+                    surf = ax.plot_surface(x_a, y_a, u_analytic1, cmap=cm.coolwarm,
                                        linewidth=0, antialiased=False);
                                        # Customize the z axis.
                     #ax.set_zlim(-0.10, 1.40);
