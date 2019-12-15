@@ -124,6 +124,26 @@ if dim == "1":
 
 
 elif dim == "2":
+    L = 1.0
+
+    x_analytic = np.linspace(0,1,1002)
+    y_analytic = np.linspace(0,1,1002)
+    t_analytic = np.linspace(0,1,1000)
+    dt = 1.0/len(t_analytic)
+    u_analytic = np.zeros((len(t_analytic),len(x_analytic),len(y_analytic)))
+    for i in tqdm(range(len(t_analytic))):
+        for j in range(len(x_analytic)):
+            u_analytic[i,j] = np.sin(np.pi*x_analytic[j])*np.sin(np.pi*y_analytic)*np.exp(-2*np.pi**2*t_analytic[i])
+
+
+    method = input("Choose method\n1: Explicit\n2: Implicit\nWrite here: ")
+    if method == "1":
+        method = "explicit"
+    elif method == "2":
+        method = "implicit"
+    else:
+        print("Not a valid method")
+        system.exit(1)
     for dx in [0.1,0.01]:
         dt = 0.2*dx*dx
         T = int(0.1/dt)
@@ -133,8 +153,10 @@ elif dim == "2":
         N = int(1.0/dx)
         x = np.linspace(0,1,N+2)
         y = np.linspace(0,1,N+2)
-        filename = "2dim_explicit:"+str(dx)
+        filename = "2dim_"+method+":"+str(dx)
+        iteration = 0
         with open(filename) as file:
+
             lines = file.readlines()
             for t in tqdm(range(T)):
                 u = np.zeros((len(x),len(y)))
@@ -146,7 +168,7 @@ elif dim == "2":
                 fig = plt.figure();
                 x_,y_ = np.meshgrid(x,y)
 
-                ax = fig.gca(projection='3d');
+                ax = fig.gca(projection='3d',xlim = (0,1.0),ylim = (0,1.0),zlim = (0,1.0));
                 # Plot the surface.
                 surf = ax.plot_surface(x_, y_, u, cmap=cm.coolwarm,
                                    linewidth=0, antialiased=False);
@@ -158,9 +180,33 @@ elif dim == "2":
                 ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'));
                 plt.xlabel("x")
                 plt.ylabel("y")
-                name = "2dim_explicit: dx = "+str(dx)
+                name = "2dim_"+method+": dx = "+str(dx)
                 plt.title(name)
-                fig.savefig("plots/2dim/"+str(dx)+"/"+name+","+str(t)+".png")
+                fig.savefig("plots/2dim/"+method+"/"+str(dx)+"/"+name+","+str(t)+".png")
+                plt.close()
+
+
+
+""" FIX PLOTTING AV ANALYTISK; LEGG ANALYTISK I C++"""
+
+                if iteration == 0:
+                    fig = plt.figure()
+                    x_a,y_a = np.meshgrid(x_analytic,t_analytic)
+                    ax = fig.gca(projection='3d');
+                    # Plot the surface.
+                    surf = ax.plot_surface(x_a, y_a, u_analytic, cmap=cm.coolwarm,
+                                       linewidth=0, antialiased=False);
+                                       # Customize the z axis.
+                    #ax.set_zlim(-0.10, 1.40);
+                    for angle in range(0,230):
+                        ax.view_init(40,angle)
+                    ax.zaxis.set_major_locator(LinearLocator(10));
+                    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'));
+                    plt.xlabel("x")
+                    plt.ylabel("y")
+                    plt.title("Analytic")
+                    fig.savefig("plots/2dim/Analytic/"+str(t)+".png")
+                iteration += 1
 
 else:
     print("Please write either 1 or 2")
