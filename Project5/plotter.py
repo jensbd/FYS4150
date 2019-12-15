@@ -21,6 +21,7 @@ if dim == "1":
         u_analytic[i,:] = x_analytic/L
         for n in range(1,100):
             u_analytic[i] += (2*(-1)**n)/(n*np.pi)*np.sin(n*np.pi*x_analytic/L)*np.exp(-n**2*np.pi**2*t_analytic[i]/L**2)
+    u_analytic[0,len(x_analytic)-1] = 1.0 # Hard coding the boundary conditions
 
 
     u_list = []
