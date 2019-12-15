@@ -59,7 +59,6 @@ int main(int argc, char* argv[]){
 
 
 
-  vec x = linspace<vec>(0,1,N+2);
 
 
   // Implement boundaries rigidly
@@ -67,26 +66,22 @@ int main(int argc, char* argv[]){
   // implement boundary for last end point
   for (int t = 0; t < T; t++){
     u(t,N+1) = 1.0;
+    u_analytic(t,N+1) = 1.0;
   }
 
-  // Initial codition
-  //g(u, N);
-  //g(u_analytic, N);
 
-  analytic(u_analytic, N, T, x, dt);
+  // Analytical solution to the diffusion equation
+  int infty = 1000; // what is defined as numerical "infinity".
 
-
-
-/*  cout << "\n" << "Which method do you want to use to solve the diffusion equation?: " << endl;
-  cout << "\n" << "Forward Euler- Explicit Scheme: " <<  "Write FE " << endl;
-  cout << "\n" << "Backward Euler- Implicit Scheme: " <<  "Write BE " << endl;
-  cout << "\n" << "Crank-Nicolson- Implicit Scheme: " <<  "Write CN " << endl;
+  analytic(u_analytic, N, T, infty);
 
 
-  cout << "\n" << "Write here " << endl;
-  string Method;
-  cin >> Method;
-*/
+  cout << "\n" << "The methods you are executing to solve the diffusion equation are: " << endl;
+  cout << "\n" << "Forward Euler- Explicit Scheme: " <<  endl;
+  cout << "\n" << "Backward Euler- Implicit Scheme: " <<  endl;
+  cout << "\n" << "Crank-Nicolson- Implicit Scheme: " <<  endl;
+
+
 
 string Method = "FE";
 string file = "Analytic:"+to_string(dx);
@@ -141,8 +136,6 @@ cout << "Text files generated" << endl;
 
 
 
-
-
 cout << "\n" << "Choose step size for Delta x,y: " << endl;
 cout << "\n" << "Delta x,y = 0.1: " <<  "Write 0.1 " << endl;
 cout << "\n" << "Delta x,y = 0.01 " <<  "Write 0.01 " << endl;
@@ -165,8 +158,35 @@ int N = int(1.0/(dx));
 int T = int(1/dt);
 
 
+cout << "\n" << "Which Task of the 2-Dim case do you want to run?: " << endl;
+cout << "\n" << "Task: Implicit & Explicit - Mandatory: " <<  "Write 1 " << endl;
+cout << "\n" << "Task: Litoshpere - Optional: " <<  "Write 2 " << endl;
+
+cout << "\n" << "Write here " << endl;
+string Task;
+cin >> Task;
+
+if (Task == "1"){
+
+
+// Analytical solution to the diffusion equation
+
+// Defining u
+mat u_analytic = zeros<mat>(N+2,N+2);
+
+string file = "2dim_Analytic:"+to_string(dx);
+file.erase ( file.find_last_not_of('0') + 1, std::string::npos );
+ofile.open(file);
+
+for (int t = 0; t < T; t++){
+  analytic_2D(u_analytic, N, T);
+  // Writing to file
+  ofile << u_analytic;
+}
+ofile.close();
+
+
 cube u = zeros<cube>(N+2, N+2, T);
-cube u_analytic = zeros<cube>(N+2,N+2,T);
 //Boundary conditions
 for (int t = 0; t < T; t++){
   for (int n = 0; n < N+2; n++){
@@ -192,7 +212,7 @@ double comptime = end-start;
 cout << "Time used for 2-dim Forward-Euler method: " << comptime << " s" << endl;
 
 
-string file = "2dim_explicit:"+to_string(dx);
+file = "2dim_explicit:"+to_string(dx);
 file.erase ( file.find_last_not_of('0') + 1, std::string::npos );
 ofile.open(file);
 for (int t = 0; t < T; t++){
@@ -232,6 +252,16 @@ cout << "Time used for Jacobis method: " << comptime << " s" << endl;
 double Total_end = omp_get_wtime();
 double Total_comptime = Total_end - Total_start;
 cout << "Total time used for 2-dim implementation: " << Total_comptime << " s" << endl;
+
+  }
+
+
+  if (Task == "2"){
+    // Defining variables for the function
+    int Case = 2;
+    Lithosphere(Case, dx, dt);
+
+  }
 }
 
   return 0;

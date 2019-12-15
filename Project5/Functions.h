@@ -15,7 +15,7 @@ using namespace  std;
 using namespace arma;
 
 
-
+// One Dimensional case functions
 void forward_step(double, rowvec &, rowvec &, int, bool);
 void forward_step_2dim(double, mat &, mat &, int);
 void forward_euler(double, mat &, int, int);
@@ -23,9 +23,16 @@ void forward_euler_2dim(double, cube &, int, int);
 void tridiagSolver(rowvec &, rowvec, double, int, bool);
 void backward_euler(double, mat &, int, int);
 void crank_nicolson(double, mat &, int, int);
-void analytic(mat &, int, int, vec, double);
-void analytic_2D(mat &, double, double);
+void analytic(mat &, int, int, int);
+
+// Two Dimensional case functions
+void analytic_2D(mat &, int, int);
 int JacobiSolver(mat &, double, double, double);
+
+// Lithosphere functions
+void Lithosphere(int, double, double);
+void Heat(mat &, int, int);
+void NoHeat(mat &, int, int);
 
 
 #endif
