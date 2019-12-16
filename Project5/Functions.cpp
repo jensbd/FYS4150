@@ -4,7 +4,7 @@
 
 // Code for solving the 1+1 dimensional diffusion equation
 // du/dt = ddu/ddx on a rectangular grid of size L x (T*dt),
-// with with L = 1, u(x,0) = g(x), u(0,t) = u(L,t) = 0
+// with with L = 1, u(x,0) = g(x), u(0,t) = 0, u(L,t) = 1
 
 double pi = 4*atan(1); // This is the constant pi
 
@@ -184,15 +184,16 @@ void analytic(mat &u, int N, int T, int infty) {
       // calculate the transient solution.
       sum = 0;
       for (int n = 1; n < infty; n++){
-        sum +=  (2*(-1)*n*n)/(n*pi)*sin(n*pi*x(j)/L)*exp(-n*n*pi*pi*t(i)/L*L);
+        sum +=  ((2*pow(-1,n))/n/pi)*sin(n*pi*x(j)/L)*exp(-n*n*pi*pi*t(i)/L/L);
       }
       u(i,j) = x(j)/L + sum;
+      //cout << "Sum in Analytical solution = " << sum << endl;
     }
   }
 }
 
 
-void analytic_2D(mat &u, int N, int T){
+void analytic_2D(mat &u, int N, double t){
   /*
    * Analytic solution for the two dimensional diffusion equation at a
    * given time. Boundary conditions are all equal to zero. A "sine-paraboloid"
@@ -202,12 +203,11 @@ void analytic_2D(mat &u, int N, int T){
   double L = 1.0;
   vec x = linspace<vec>(0,1,N+2);
   vec y = linspace<vec>(0,1,N+2);
-  vec t = linspace<vec>(0,1,T);
 
 
   for (int i = 0; i < N+1; i++){
     for (int j = 0; j < N+1; j++){
-      u(i,j) = sin(pi*x(j))*sin(pi*y(j))*exp(-2*pi*pi*t(i));
+      u(i,j) = sin(pi*x(j))*sin(pi*y(j))*exp(-2*pi*pi*t);
     }
   }
 }
@@ -270,7 +270,7 @@ ofile.close();
 
 void Lithosphere(int Case, double dx, double dt, double tol, int maxiter){
   /*
-   Solver throughout 1 Ga of the lithosphere in three zones:
+   1 Ga of the lithosphere in three zones:
    Zone 1: 0-20km,
    Zone 2: 20-40km,
    Zone 3: 40-120km.
@@ -322,11 +322,11 @@ void Lithosphere(int Case, double dx, double dt, double tol, int maxiter){
   double rho = 3.51*1e3; // Density [kg/m^3]
   double cp = 1000; // Heat capacity [J/kg/deg Celsius]
   double k = 2.5; // Thermal conductivity [W/m/deg Celsius]
-  double u_s = 1292; // Temperature scale - T(120) - T(0)
+  double T_s = 1292; // Temperature scale - T(120) - T(0)
   double t_s = 3.1557e16; // Time scale
-  double x_s = 120000; // dDistance scale - xmax = 120
+  double x_s = 120000; // Distance scale - xmax = 120 km
   double beta = t_s*k/(rho*cp*x_s*x_s);
-  double Q_s = 1e-6*t_s*dt/(rho*cp*u_s);
+  double Q_s = 1e-6*t_s*dt/(rho*cp*T_s);
   double term1 = beta*alpha;
   double term2 = 1/(1 + 4*term1);
 
@@ -394,28 +394,36 @@ void NoHeat(mat& u, int Nx, int Ny){
 }
 
 void Heat(mat& u, int Nx, int Ny){
-  // Analytic solution to steady state Temp(depth) with natural heat production
-  // temperature is scaled [8-1300] -> [0-1292] -> [0,1]
+  // Analytical solution to steady state Temp(depth) with natural heat production
+  // Temperature is scaled [8-1300] -> [0-1292] -> [0,1]
   double z, func, limit;
+  double a_1, a_2, a_3; // Coefficients for the functions
+  double b_1, b_2, b_3; // Coefficients for the functions
+  double c_1, c_2, c_3; // Coefficients for the functions
+
+  a_1 = -0.28; a_2 = -0.07; a_3 = -0.01;
+  b_1 = 23.66; b_2 = 15.26; b_3 = 10.46;
+  c_1 = 0.0; c_2 = 86; c_3 = 180;
+
   limit = 17;
 
   for (double j = 0; j < limit; j++){
     z = j*1.2;
-    func = (-0.28*z*z + 23.66*z)/1292.0;
+    func = (a_1*z*z + b_1*z + c_1)/1292.0;
     for (int i = 0; i <= Nx; i++){
     u(i,j) = func;
     }
   }
   for (double j = limit; j < 2*limit; j++){
     z = j*1.2;
-    func = (-0.07*z*z + 15.26*z + 86)/1292.0;
+    func = (a_2*z*z + b_2*z + c_2)/1292.0;
     for (int i = 0; i <= Nx; i++){
       u(i,j) = func;
     }
   }
   for (double j = 2*limit; j <= Ny; j++){
     z = j*1.2;
-    func = (-0.01*z*z + 10.46*z + 180)/1292.0;
+    func = (a_3*z*z + b_3*z + c_3)/1292.0;
     for (int i = 0; i <= Nx; i++){
       u(i,j) = func;
     }
@@ -423,12 +431,12 @@ void Heat(mat& u, int Nx, int Ny){
 }
 
 void Decay(vec& Q_time, int T, double Q_s){
-  double Uranium, Thorium, Potassium, time;
+  double Uranium, Thorium, Potassium, times;
   for (int t = 0; t <= T; t++){
-    time = (double) t/T;
-    Uranium = exp (-0.155*time);
-    Thorium = exp (-0.0495*time);
-    Potassium = exp (-0.555*time);
+    times = (double) t/T;
+    Uranium = exp (-0.155*times);
+    Thorium = exp (-0.0495*times);
+    Potassium = exp (-0.555*times);
     Q_time(t) = Q_s*(0.2*Uranium + 0.2*Thorium + 0.1*Potassium);
   }
 }

@@ -12,7 +12,6 @@ dim = input("Write here: ")
 
 if dim == "1":
     L = 1.0
-
     x_analytic = np.linspace(0,1,1002)
     t_analytic = np.linspace(0,1,1000)
     dt = 1.0/len(t_analytic)
@@ -20,9 +19,8 @@ if dim == "1":
     for i in tqdm(range(len(t_analytic))):
         u_analytic[i,:] = x_analytic/L
         for n in range(1,100):
-            u_analytic[i] += (2*(-1)**n)/(n*np.pi)*np.sin(n*np.pi*x_analytic/L)*np.exp(-n**2*np.pi**2*t_analytic[i]/L**2)
-    u_analytic[0,len(x_analytic)-1] = 1.0 # Hard coding the boundary conditions
-
+            u_analytic[i] += ((2*(-1)**n)/(n*np.pi))*np.sin(n*np.pi*x_analytic/L)*np.exp(-n**2*np.pi**2*t_analytic[i]/L**2)
+    #u_analytic[0,len(x_analytic)-1] = 1.0 # Hard coding the boundary conditions
 
     u_list = []
     x_list = []
@@ -189,7 +187,7 @@ elif dim == "2":
 
 
 # FIX PLOTTING AV ANALYTISK; LEGG ANALYTISK I C++
-
+"""
                 if iteration == 0:
                     fig = plt.figure()
                     x_a,y_a = np.meshgrid(x_analytic,y_analytic)
@@ -208,6 +206,6 @@ elif dim == "2":
                     plt.title("Analytic")
                     fig.savefig("plots/2dim/Analytic/"+str(t)+".png")
                 iteration += 1
-
+"""
 else:
     print("Please write either 1 or 2")

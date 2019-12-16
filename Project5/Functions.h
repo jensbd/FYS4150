@@ -26,7 +26,7 @@ void crank_nicolson(double, mat &, int, int);
 void analytic(mat &, int, int, int);
 
 // Two Dimensional case functions
-void analytic_2D(mat &, int, int);
+void analytic_2D(mat &, int, double);
 int JacobiSolver(mat &, double, double, double, int);
 
 // Lithosphere functions

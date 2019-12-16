@@ -66,7 +66,6 @@ int main(int argc, char* argv[]){
   // implement boundary for last end point
   for (int t = 0; t < T; t++){
     u(t,N+1) = 1.0;
-    u_analytic(t,N+1) = 1.0;
   }
 
 
@@ -135,8 +134,8 @@ cout << "Text files generated" << endl;
   if (Dimension == "2"){
 
 cout << "\n" << "Which Task of the 2-Dim case do you want to run?: " << endl;
-cout << "\n" << "Task: Implicit & Explicit - Mandatory: " <<  "Write 1 " << endl;
-cout << "\n" << "Task: Litoshpere - Optional: " <<  "Write 2 " << endl;
+cout << "\n" << "Task: Implicit & Explicit: " <<  "Write 1 " << endl;
+cout << "\n" << "Task: Lithosphere: " <<  "Write 2 " << endl;
 
 cout << "\n" << "Write here " << endl;
 string Task;
@@ -166,7 +165,7 @@ int N = int(1.0/(dx));
 int T = int(1/dt);
 
 
-// Analytical solution to the diffusion equation
+// Analytical solution to the diffusion equation in two dimensions
 
 // Defining u
 mat u_analytic = zeros<mat>(N+2,N+2);
@@ -174,9 +173,10 @@ mat u_analytic = zeros<mat>(N+2,N+2);
 string file = "2dim_Analytic:"+to_string(dx);
 file.erase ( file.find_last_not_of('0') + 1, std::string::npos );
 ofile.open(file);
-
+double temp;
 for (int t = 0; t < T; t++){
-  analytic_2D(u_analytic, N, T);
+  temp = t*dt;
+  analytic_2D(u_analytic, N, temp);
   // Writing to file
   ofile << u_analytic;
 }
