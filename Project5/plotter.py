@@ -187,7 +187,7 @@ elif dim == "2":
 
 
 # FIX PLOTTING AV ANALYTISK; LEGG ANALYTISK I C++
-"""
+                """
                 if iteration == 0:
                     fig = plt.figure()
                     x_a,y_a = np.meshgrid(x_analytic,y_analytic)
@@ -206,6 +206,6 @@ elif dim == "2":
                     plt.title("Analytic")
                     fig.savefig("plots/2dim/Analytic/"+str(t)+".png")
                 iteration += 1
-"""
+                """
 else:
     print("Please write either 1 or 2")

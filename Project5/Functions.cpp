@@ -394,7 +394,7 @@ void NoHeat(mat& u, int Nx, int Ny){
 }
 
 void Heat(mat& u, int Nx, int Ny){
-  // Analytical solution to steady state Temp(depth) with natural heat production
+  // Analytical solution to steady state Temp(depth) with heat production
   // Temperature is scaled [8-1300] -> [0-1292] -> [0,1]
   double z, func, limit;
   double a_1, a_2, a_3; // Coefficients for the functions
