@@ -180,7 +180,7 @@ void analytic(mat &u, int N, int T, int infty) {
   // time loop
   for (int i = 0; i < T; i++){
     // position x loop
-    for (int j = 1; j < N+1; j++){
+    for (int j = 0; j < N+2; j++){
       // calculate the transient solution.
       sum = 0;
       for (int n = 1; n < infty; n++){

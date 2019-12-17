@@ -6,6 +6,7 @@ from matplotlib.pyplot import cm
 from tqdm import tqdm
 from matplotlib import rc
 
+
 #Latex font for plots
 rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
 rc('text', usetex=True)
@@ -156,6 +157,7 @@ if dim == "1":
         plt.legend(["FE", "BE", "CN", "Analytic"])
         plt.xlabel("x")
         plt.ylabel("u(x,t=0.1) - $u_{exact}$(x,t=0.1)")
+        #plt.ylim((-10**(-5),10**(-3)))
         plt.savefig("plots/1dim/Differences_0.1_"+str(dx[i])+".pgf")
     plt.show()
 
@@ -182,7 +184,8 @@ if dim == "1":
         plt.legend(["FE", "BE", "CN", "Analytic"])
         plt.xlabel("x")
         plt.ylabel("u(x,t=0.2) - $u_{exact}$(x,t=0.2)")
-        plt.savefig("plots/1dim/Differences_0.1_"+str(dx[i])+".pgf")
+        #plt.ylim((-10**(-5),10**(-3)))
+        plt.savefig("plots/1dim/Differences_0.2_"+str(dx[i])+".pgf")
     plt.show()
 
 
@@ -205,10 +208,10 @@ elif dim == "2":
 
     for method in ["Analytic:","2dim_implicit"]:
         for dx in [0.1,0.01]:
-            dt = 0.2*dx*dx
-            T = int(0.1/dt)
+            dt = dx
+            T = int(1.0/dt)
             #Generate t-mesh
-            t = np.linspace(0,0.1,T)
+            t = np.linspace(0,1,T)
             #Generate x- and y-mesh
             N = int(1.0/dx)
             x = np.linspace(0,1,N+2)
@@ -243,7 +246,7 @@ elif dim == "2":
                     plt.ylabel("y")
                     name = "2dim_"+method+": dx = "+str(dx)
                     plt.title(name)
-                    fig.savefig("plots/2dim/"+method+"/"+str(dx)+"/"+name+","+str(t)+".png")
+                    #fig.savefig("plots/2dim/"+method+"/"+str(dx)+"/"+name+","+str(t)+".png")
                     plt.close()
 
 
