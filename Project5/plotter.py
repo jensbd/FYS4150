@@ -11,21 +11,25 @@ print("Write 1 or 2")
 dim = input("Write here: ")
 
 if dim == "1":
+
     L = 1.0
     x_analytic = np.linspace(0,1,1002)
+    #dt1 = 0.5*0.1*0.1
     t_analytic = np.linspace(0,1,1000)
     dt = 1.0/len(t_analytic)
     u_analytic = np.zeros((len(t_analytic),len(x_analytic)))
-    for i in tqdm(range(len(t_analytic))):
-        u_analytic[i,:] = x_analytic/L
-        for n in range(1,100):
-            u_analytic[i] += ((2*(-1)**n)/(n*np.pi))*np.sin(n*np.pi*x_analytic/L)*np.exp(-n**2*np.pi**2*t_analytic[i]/L**2)
+    #for i in tqdm(range(len(t_analytic))):
+        #u_analytic[i,:] = x_analytic/L
+        #for n in range(1,100):
+            #u_analytic[i] += ((2*(-1)**n)/(n*np.pi))*np.sin(n*np.pi*x_analytic/L)*np.exp(-n**2*np.pi**2*t_analytic[i]/L**2)
     #u_analytic[0,len(x_analytic)-1] = 1.0 # Hard coding the boundary conditions
 
+    #print(u_analytic)
     u_list = []
     x_list = []
     t_list = []
-    for method in ["FE:", "BE:", "CN:"]:
+
+    for method in ["Analytic:","FE:", "BE:", "CN:"]:
         for dx in [0.1, 0.01]:
             dt = 0.5*dx*dx
             #Generate t-mesh
@@ -68,9 +72,9 @@ if dim == "1":
                 plt.ylabel("t")
                 name = method+" dx = "+str(dx)
                 plt.title(name)
-                fig.savefig("plots/"+name+".png")
+                #fig.savefig("plots/"+name+".png")
 
-
+                """
                 if method == "FE:" and dx == 0.1:
                     fig = plt.figure()
                     x,t = np.meshgrid(x_analytic,t_analytic)
@@ -89,35 +93,79 @@ if dim == "1":
                     plt.title("Analytic")
                     fig.savefig("plots/Analytic.png")
                 plt.show()
+                """
     dx = [0.1, 0.01]
+    """
     for i in range(2):
         fig = plt.figure();
-        plt.title("Numerical vs Analytical solution for t = 0 \n dx = %g" % (dx[i]))
+        plt.title("Computed solutions at time = 0 \n dx = %g" % (dx[i]))
         plt.plot(x_list[i], u_list[i][0], ".")
         plt.plot(x_list[i], u_list[2+i][0], ".")
         plt.plot(x_list[i], u_list[4+i][0], ".")
-        plt.plot(x_analytic, u_analytic[0])
+        plt.plot(x_list[i], u_list[6+i][0])
+        #plt.plot(x_analytic, u_analytic[0])
         plt.legend(["FE", "BE", "CN", "Analytic"])
+        plt.xlabel("x")
+        plt.ylabel("u(x,t)")
+
+        fig = plt.figure();
+        plt.title("Absolute difference between computed and analytical at time = 0 \n dx = %g" % (dx[i]))
+        plt.plot(x_list[i], abs(u_list[i][0] - u_list[6+i][0]), ".")
+        plt.plot(x_list[i], abs(u_list[2+i][0] - u_list[6+i][0]), ".")
+        plt.plot(x_list[i], abs(u_list[4+i][0] - u_list[6+i][0]), ".")
+        plt.plot(x_list[i], abs(u_list[6+i][0] - u_list[6+i][0]))
+        #plt.plot(x_analytic, u_analytic[0])
+        plt.legend(["FE", "BE", "CN", "Analytic"])
+        plt.xlabel("x")
+        plt.ylabel("u(x,t)")
+    plt.show()
+    """
+    for i in range(2):
+        fig = plt.figure();
+        plt.title("Computed solutions at time = 0.1 \n dx = %g" % (dx[i]))
+        plt.plot(x_list[i], u_list[i][int(len(t_list[i])/10)], ".")
+        plt.plot(x_list[i], u_list[2+i][int(len(t_list[i])/10)], ".")
+        plt.plot(x_list[i], u_list[4+i][int(len(t_list[i])/10)], ".")
+        plt.plot(x_list[i], u_list[6+i][int(len(t_list[i])/10)])
+        #plt.plot(x_analytic, u_analytic[int(len(t_analytic)/10)])
+        plt.legend(["FE", "BE", "CN", "Analytic"])
+        plt.xlabel("x")
+        plt.ylabel("u(x,t=0.1)")
+
+        fig = plt.figure();
+        plt.title("Absolute difference between computed and analytical at time = 0.1 \n dx = %g" % (dx[i]))
+        plt.plot(x_list[i], abs(u_list[i][int(len(t_list[i])/10)] - u_list[6+i][int(len(t_list[i])/10)]), ".")
+        plt.plot(x_list[i], abs(u_list[2+i][int(len(t_list[i])/10)] - u_list[6+i][int(len(t_list[i])/10)]), ".")
+        plt.plot(x_list[i], abs(u_list[4+i][int(len(t_list[i])/10)] - u_list[6+i][int(len(t_list[i])/10)]), ".")
+        plt.plot(x_list[i], abs(u_list[6+i][int(len(t_list[i])/10)] - u_list[6+i][int(len(t_list[i])/10)]))
+        #plt.plot(x_analytic, u_analytic[0])
+        plt.legend(["FE", "BE", "CN", "Analytic"])
+        plt.xlabel("x")
+        plt.ylabel("u(x,t=0.1) - $u_{exact}$(x,t=0.1)")
     plt.show()
 
     for i in range(2):
         fig = plt.figure();
-        plt.title("Numerical vs analytical solution for t = 0.5 \n dx = %g" % (dx[i]))
-        plt.plot(x_list[i], u_list[i][int(len(t_list[i])/2)], ".")
-        plt.plot(x_list[i], u_list[2+i][int(len(t_list[i])/2)], ".")
-        plt.plot(x_list[i], u_list[4+i][int(len(t_list[i])/2)], ".")
-        plt.plot(x_analytic, u_analytic[int(len(t_analytic)/2)])
+        plt.title("Computed solutions at time = 0.2 \n dx = %g" % (dx[i]))
+        plt.plot(x_list[i], u_list[i][int(len(t_list[i])/5)], ".")
+        plt.plot(x_list[i], u_list[2+i][int(len(t_list[i])/5)], ".")
+        plt.plot(x_list[i], u_list[4+i][int(len(t_list[i])/5)], ".")
+        plt.plot(x_list[i], u_list[6+i][int(len(t_list[i])/5)])
+        #plt.plot(x_analytic, u_analytic[int(len(t_analytic)/5)])
         plt.legend(["FE", "BE", "CN", "Analytic"])
-    plt.show()
+        plt.xlabel("x")
+        plt.ylabel("u(x,t=0.2)")
 
-    for i in range(2):
         fig = plt.figure();
-        plt.title("Numerical vs analytical solution for t = 1.0 \n dx = %g" % (dx[i]))
-        plt.plot(x_list[i], u_list[i][len(t_list[i])-1], ".")
-        plt.plot(x_list[i], u_list[2+i][len(t_list[i])-1], ".")
-        plt.plot(x_list[i], u_list[4+i][len(t_list[i])-1], ".")
-        plt.plot(x_analytic, u_analytic[len(t_analytic)-1])
+        plt.title("Absolute difference between computed and analytical at time = 0.2 \n dx = %g" % (dx[i]))
+        plt.plot(x_list[i], abs(u_list[i][int(len(t_list[i])/5)] - u_list[6+i][int(len(t_list[i])/5)]), ".")
+        plt.plot(x_list[i], abs(u_list[2+i][int(len(t_list[i])/5)] - u_list[6+i][int(len(t_list[i])/5)]), ".")
+        plt.plot(x_list[i], abs(u_list[4+i][int(len(t_list[i])/5)] - u_list[6+i][int(len(t_list[i])/5)]), ".")
+        plt.plot(x_list[i], abs(u_list[6+i][int(len(t_list[i])/5)] - u_list[6+i][int(len(t_list[i])/5)]))
+        #plt.plot(x_analytic, u_analytic[int(len(t_analytic)/5)])
         plt.legend(["FE", "BE", "CN", "Analytic"])
+        plt.xlabel("x")
+        plt.ylabel("u(x,t=0.2) - $u_{exact}$(x,t=0.2)")
     plt.show()
 
 
