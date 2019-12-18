@@ -14,12 +14,14 @@ rc('font', family='serif')
 plt.rcParams.update({'font.size': 10}) # Setting all font sizes
 
 
-print("Do you want to run 1 or 2-dimensional?")
-print("Write 1 or 2")
+print("Which Task you want to run 1-dim , 2-dim or Lithosphere?")
+print("Write 1 , 2 or 3")
 
-dim = input("Write here: ")
+Task = input("Write here: ")
+
+Task = input("Write here: ")
 w = 5.78851          # Latex document text width
-if dim == "1":
+if Task == "1":
 
     L = 1.0
     x_analytic = np.linspace(0,1,1002)
@@ -189,7 +191,7 @@ if dim == "1":
     plt.show()
 
 
-elif dim == "2":
+elif Task == "2":
 
     L = 1.0
     """
@@ -263,5 +265,111 @@ elif dim == "2":
 
         print(diff)
 
+elif Task == "3":
+    w = 5.78851          # Latex document text width
+    fig = plt.figure();
+    fig.set_size_inches(w=w*1.0,h= 4.0)
+    # analytic: no heat production
+    analytic = []
+    x = np.linspace(0,120,101)
+    y = np.linspace(0,1,101)*1292 + 8
+    analytic.append(y)
+
+
+    # analytic: natural heat production
+    x_ = [x[:17],x[17:34],x[34:]]
+    z_ = [
+        [-0.28,-23.66,8],
+        [-0.07,-15.26,92],
+        [-0.01,-10.46,188]
+        ]
+    y2 = []
+    for x,zone in zip(x_,z_):
+        y = np.polyval(zone,-x)
+        y2.append(y)
+
+
+    analytic.append(np.concatenate((y2[0],y2[1],y2[2])))
+    # analytic: natural + subduction
+    z_ = [
+        [-0.28,-29,8],
+        [-0.07,-20.6,92],
+        [-0.11,-23.8,28]
+        ]
+    y3 = []
+    for x,zone in zip(x_,z_):
+        y = np.polyval(zone,-x)
+        y3.append(y)
+    analytic.append(np.concatenate((y3[0],y3[1],y3[2])))
+
+    for i in range(len(analytic)):
+        plt.plot(np.linspace(0,120,101),analytic[i],"--")
+    plt.xlabel("Depth [km]")
+    plt.ylabel(r"Temperature $[^\circ C]$")
+    plt.grid()
+    plt.legend(["No Heat",
+    "Heat","Enriched mantle $\\&$ No Decay"])
+    plt.title("Analytical")
+    plt.savefig("plots/Lithosphere/Analytical.pgf")
+    plt.show()
+
+
+    fig = plt.figure();
+    fig.set_size_inches(w=w*1.0,h= 4.0)
+    Nx = 126
+    Ny = 101
+    u = np.zeros((Nx,Ny))
+    numerical = []
+    for filename in ["No_Heat","Heat","No_Decay","Decay"]:
+        dx = 0.01
+        dt = dx
+        T = int(1.0/dt)
+        #Generate t-mesh
+        t = np.linspace(0,1,T)
+        #Generate x- and y-mesh
+        N = int(1.0/dx)
+        with open(filename) as file:
+            lines = file.readlines()
+            for t in tqdm(range(T)):
+                for i in range(Nx):
+                    data = lines[t*Nx+i].split()
+
+                    u[i] = data
+
+
+        temp = u[int(Nx/2)]*1292 + 8
+        depth = np.linspace(0,120,Ny)
+        plt.plot(depth,temp)
+        plt.xlabel("Depth [km]")
+        plt.ylabel(r"Temperature $[^\circ C]$")
+        numerical.append(temp)
+
+    plt.legend(["No Heat",
+    "Heat",
+    "Enriched mantle $\\&$ No Decay",
+    "Enriched mantle $\\&$ Decay"
+    ])
+    plt.title("Numerical")
+    plt.grid()
+    plt.savefig("plots/Lithosphere/Numerical.pgf")
+    plt.show()
+
+    # error plot
+    fig = plt.figure();
+    fig.set_size_inches(w=w*1.0,h= 4.0)
+    x = np.linspace(0,120,101)
+    for i in range(len(analytic)):
+        a = np.array(analytic[i])
+        n = np.array(numerical[i])
+        z = abs((a-n)/(a))
+        plt.plot(x[1:-1],z[1:-1])
+        plt.yscale('log')
+    plt.xlabel('Depth [km]')
+    plt.ylabel('Relative error')
+    plt.grid()
+    plt.legend(["No Heat","Heat","Enriched mantle $\\&$ No Decay"])
+    plt.savefig("plots/Lithosphere/Relative_Error.pgf")
+    plt.show()
+
 else:
-    print("Please write either 1 or 2")
+    print("Please write either 1, 2 or 3")
