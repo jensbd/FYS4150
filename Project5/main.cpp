@@ -217,7 +217,14 @@ for (int t = 0; t < T; t++){
 }
 ofile.close();
 
+// Step length in time
+dt = dx;
 
+// Defining alpha
+alpha = dt/dx/dx;
+
+// Number of time steps till final time
+T = int(1/dt);
 
 mat u_implicit = zeros<mat>(N+2, N+2);
 
@@ -262,18 +269,10 @@ if (Task == "2"){
   int maxiter = 10000; // Max no. of iterations each time step in Jacobi Method
 
 
-  cout << "\n" << "Which Case of the Lithosphere do you want to run?: " << endl;
-  cout << "\n" << "Lithosphere with no heat production " <<  "Write '1' " << endl;
-  cout << "\n" << "Lithosphere with heat production: " <<  "Write '2' " << endl;
-  cout << "\n" << "Lithosphere with enrichment and no decay: " <<  "Write '3' " << endl;
-  cout << "\n" << "Lithosphere with enrichment with decay: " <<  "Write '4' " << endl;
 
-
-  cout << "\n" << "Write here " << endl;
-  int Case;
-  cin >> Case;
-
+  for (int Case = 1; Case < 5; Case++){
   Lithosphere(Case, dx, dt, tolerance, maxiter);
+    }
 
   }
 }

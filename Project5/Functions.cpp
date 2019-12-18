@@ -180,7 +180,7 @@ void analytic(mat &u, int N, int T, int infty) {
   // time loop
   for (int i = 0; i < T; i++){
     // position x loop
-    for (int j = 1; j < N+1; j++){
+    for (int j = 0; j < N+2; j++){
       // calculate the transient solution.
       sum = 0;
       for (int n = 1; n < infty; n++){
@@ -282,7 +282,6 @@ void Lithosphere(int Case, double dx, double dt, double tol, int maxiter){
 
    ofstream ofile;
    string file;
-   ofile.open(file);
 
 
   double Qmantle = 0; // represents the constant Q term in the mantle
@@ -301,12 +300,14 @@ void Lithosphere(int Case, double dx, double dt, double tol, int maxiter){
     cout << "Error, Case must be 1,2,3,4.\n";
     exit(1);
   }
-
+  ofile.open(file);
   // initialization
   int Nx = int(1.25/dx); // 0-150 km wide
   int Ny = int(1/dx); // 0-120 km deep
   int T = int(1/dt); // number of time steps
-  mat u = zeros<mat>(Nx+1,Ny+1); // Scaled from 0-1 -> 8-1300 deg Celsius
+  mat u = zeros<mat>(Nx+1,Ny+1);
+
+// Applying the cases
   if (Case == 1){
     NoHeat(u,Nx,Ny);
   }
@@ -380,15 +381,15 @@ void Lithosphere(int Case, double dx, double dt, double tol, int maxiter){
 
 void NoHeat(mat& u, int Nx, int Ny){
   // Creates boundary conditions for the case of Q = 0 everywhere
-  for (int i = 0; i <= Nx; i++){
+  for (int i = 0; i < Nx+1; i++){
     u(i,0) = 0;
     u(i,Ny) = 1;
   }
   // linear temperature from 0-1 (scaled)
-  for (int i = 0; i <= Nx; i += Nx){
-    for (double j = 0; j <= Ny; j++){
-      u(i,j) = j/Ny;
-      u(i,j) = j/Ny;
+  for (int i = 0; i < Nx+1; i += Nx){
+    for (double j = 0; j < Ny+1; j++){
+      u(i,j) = (double) j/Ny;
+      u(i,j) = (double) j/Ny;
     }
   }
 }
