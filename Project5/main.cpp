@@ -153,108 +153,119 @@ cin >> dx;
 
 // Step length in time
 //double dt = 0.2*dx*dx;
-double dt = dx;
+vec dt_list = zeros<vec>(3);
+dt_list(0) = dx;
+dt_list(1) = 0.1*dx;
+dt_list(2) = 0.01*dx;
+for (int d = 0; d<dt_list.size(); d++){
+  double dt = dt_list(d);
+  // Defining alpha
+  double alpha = dt/dx/dx;
 
-// Defining alpha
-double alpha = dt/dx/dx;
+  // Number of integration points along x and y (inner points only)
+  int N = int(1.0/(dx));
 
-// Number of integration points along x and y (inner points only)
-int N = int(1.0/(dx));
-
-// Number of time steps till final time
-int T = int(1/dt);
+  // Number of time steps till final time
+  int T = int(1/dt);
 
 
 
-cube u = zeros<cube>(N+2, N+2, T);
-//Boundary conditions
-for (int t = 0; t < T; t++){
+  cube u = zeros<cube>(N+2, N+2, T);
+  //Boundary conditions
+  for (int t = 0; t < T; t++){
+    for (int n = 0; n < N+2; n++){
+      u(n,N+1,t) = 0.0;
+      u(N+1,n,t) = 0.0;
+    }
+  }
+
+
+
+
+  // Initial conditions
+    for (double i = 1; i < N+1; i++) {
+      for (double j =1; j < N+1; j++) {
+        u(i,j,0) = sin(i*PI/(double)N)*sin(j*PI/(double)N);
+      }
+    }
+
+
+  //double Total_start = omp_get_wtime();
+
+  /*
+  double start = omp_get_wtime();
+  forward_euler_2dim(alpha,u,N,T);
+  double end = omp_get_wtime();
+  double comptime = end-start;
+  cout << "Time used for 2-dim Forward-Euler method: " << comptime << " s" << endl;
+
+
+  file = "2dim_explicit:"+to_string(dx);
+  file.erase ( file.find_last_not_of('0') + 1, std::string::npos );
+  ofile.open(file);
+  for (int t = 0; t < T; t++){
+    ofile << u.slice(t);
+  }
+  ofile.close();
+  */
+
+
+  // Analytical solution to the diffusion equation in two dimensions
+
+  // Defining u
+  mat u_analytic = zeros<mat>(N+2,N+2);
+
+  string dxstring = to_string(dx);
+  dxstring.erase ( dxstring.find_last_not_of('0') + 1, std::string::npos );
+  string dtstring = to_string(dt);
+  dtstring.erase ( dtstring.find_last_not_of('0') + 1, std::string::npos );
+  string file = "2dim_Analytic:dx="+dxstring+"dt="+dtstring;
+
+
+  ofile.open(file);
+  double temp;
+  for (int t = 0; t < T; t++){
+    temp = t*dt;
+    analytic_2D(u_analytic, N, temp);
+    // Writing to file
+    ofile << u_analytic;
+  }
+  ofile.close();
+
+
+  mat u_implicit = zeros<mat>(N+2, N+2);
+
+
+  // Implement boundaries rigidly
+  // Boundary condition for endpoints is already zero
+  //Boundary conditions
   for (int n = 0; n < N+2; n++){
-    u(n,N+1,t) = 0.0;
-    u(N+1,n,t) = 0.0;
+    u_implicit(n, N+1) = 0.0;
+    u_implicit(N+1, n) = 0.0;
   }
-}
-
-
-
-
-// Initial conditions
-  for (double i = 1; i < N+1; i++) {
-    for (double j =1; j < N+1; j++) {
-      u(i,j,0) = sin(i*PI/(double)N)*sin(j*PI/(double)N);
+  // Initial conditions
+    for (double i = 1; i < N+1; i++) {
+      for (double j =1; j < N+1; j++) {
+        u_implicit(i,j) = sin(i*PI/(double)N)*sin(j*PI/(double)N);
+      }
     }
-  }
 
 
-//double Total_start = omp_get_wtime();
-
-/*
-double start = omp_get_wtime();
-forward_euler_2dim(alpha,u,N,T);
-double end = omp_get_wtime();
-double comptime = end-start;
-cout << "Time used for 2-dim Forward-Euler method: " << comptime << " s" << endl;
+  double tolerance = 1e-10; // tolerance for convergence in Jacobi method
+  int maxiter = 10000; // Max no. of iterations each time step in Jacobi Method
 
 
-file = "2dim_explicit:"+to_string(dx);
-file.erase ( file.find_last_not_of('0') + 1, std::string::npos );
-ofile.open(file);
-for (int t = 0; t < T; t++){
-  ofile << u.slice(t);
+  double start = omp_get_wtime();
+  int itcount = JacobiSolver(u_implicit, dx, dt, tolerance, maxiter);
+  double end = omp_get_wtime();
+  double comptime = end-start;
+  cout << "Time used for Jacobis method: " << comptime << " s" << endl;
+
+  //double Total_end = omp_get_wtime();
+  //double Total_comptime = Total_end - Total_start;
+  //cout << "Total time used for 2-dim implementation: " << Total_comptime << " s" << endl;
+
 }
-ofile.close();
-*/
-
-
-// Analytical solution to the diffusion equation in two dimensions
-
-// Defining u
-mat u_analytic = zeros<mat>(N+2,N+2);
-
-string file = "2dim_Analytic:"+to_string(dx);
-file.erase ( file.find_last_not_of('0') + 1, std::string::npos );
-ofile.open(file);
-double temp;
-for (int t = 0; t < T; t++){
-  temp = t*dt;
-  analytic_2D(u_analytic, N, temp);
-  // Writing to file
-  ofile << u_analytic;
-}
-ofile.close();
-
-
-mat u_implicit = zeros<mat>(N+2, N+2);
-
-
-// Implement boundaries rigidly
-// Boundary condition for endpoints is already zero
-//Boundary conditions
-for (int n = 0; n < N+2; n++){
-  u_implicit(n, N+1) = 0.0;
-  u_implicit(N+1, n) = 0.0;
-}
-// Initial conditions
-  for (double i = 1; i < N+1; i++) {
-    for (double j =1; j < N+1; j++) {
-      u_implicit(i,j) = sin(i*PI/(double)N)*sin(j*PI/(double)N);
-    }
-  }
-
-
-double tolerance = 1e-10; // tolerance for convergence in Jacobi method
-int maxiter = 10000; // Max no. of iterations each time step in Jacobi Method
-
-
-double start = omp_get_wtime();
-int itcount = JacobiSolver(u_implicit, dx, dt, tolerance, maxiter);
-double end = omp_get_wtime();
-double comptime = end-start;
-cout << "Time used for Jacobis method: " << comptime << " s" << endl;
-
-//double Total_end = omp_get_wtime();
-//double Total_comptime = Total_end - Total_start;
-//cout << "Total time used for 2-dim implementation: " << Total_comptime << " s" << endl;
 
   }
 
