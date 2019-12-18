@@ -18,7 +18,7 @@ print("Do you want to run 1 or 2-dimensional?")
 print("Write 1 or 2")
 
 dim = input("Write here: ")
-
+w = 5.78851          # Latex document text width
 if dim == "1":
 
     L = 1.0
@@ -130,7 +130,7 @@ if dim == "1":
     plt.show()
     """
 
-    w = 5.78851          # Latex document text width
+
 
     for i in range(2):
         fig = plt.figure();
@@ -190,8 +190,9 @@ if dim == "1":
 
 
 elif dim == "2":
-    L = 1.0
 
+    L = 1.0
+    """
     x_analytic = np.linspace(0,1,1002)
     y_analytic = np.linspace(0,1,1002)
     t_analytic = np.linspace(0,1,1000)
@@ -201,64 +202,44 @@ elif dim == "2":
         u_analytic1 = u_analytic[i]
         for j in range(len(x_analytic)):
             u_analytic[i,j] = np.sin(np.pi*x_analytic[j])*np.sin(np.pi*y_analytic)*np.exp(-2*np.pi**2*t_analytic[i])
-
+    """
 
 # FIKS FERDIG DET UNDER HER
 
+    u_list = []
+    dxlist = [0.1,0.01]
 
-    for method in ["Analytic:","2dim_implicit"]:
-        for dx in [0.1,0.01]:
-            dt = dx
-            T = int(1.0/dt)
-            #Generate t-mesh
-            t = np.linspace(0,1,T)
-            #Generate x- and y-mesh
-            N = int(1.0/dx)
-            x = np.linspace(0,1,N+2)
-            y = np.linspace(0,1,N+2)
-            filename = "2dim_"+method+":"+str(dx)
-            iteration = 0
-            with open(filename) as file:
+    for method in ["Analytic","Implicit"]:
+        for dx in dxlist:
+            #2 different dt for analysing stability of scheme
+            dtlist = [dx,dx/10,dx/100]
+            for dt in dtlist:
+                T = int(1.0/dt)
+                #Generate t-mesh
+                t = np.linspace(0,1,T)
+                #Generate x- and y-mesh
+                N = int(1.0/dx)
+                x = np.linspace(0,1,N+2)
+                y = np.linspace(0,1,N+2)
+                filename = "2dim_"+method+":dx="+str(dx)+"dt="+str(dt)
+                time = int(0.01*T)  #The time we choose to sample the solution at
+                with open(filename) as file:
 
-                lines = file.readlines()
-                for t in tqdm(range(T)):
+                    lines = file.readlines()
                     u = np.zeros((len(x),len(y)))
                     for i in range(len(y)):
-                        data = lines[t*len(x)+i].split()
+                        data = lines[time*len(x)+i].split()
 
                         u[i] = data
 
-                    fig = plt.figure();
-                    fig.set_size_inches(w=w*0.8,h= 4.5)
-                    x_,y_ = np.meshgrid(x,y)
+                    if dt == dx:
+                        fig = plt.figure();
+                        fig.set_size_inches(w=w*0.8,h= 3.5)
+                        x_,y_ = np.meshgrid(x,y)
 
-                    ax = fig.gca(projection='3d',xlim = (0,1.0),ylim = (0,1.0),zlim = (0,1.0));
-                    # Plot the surface.
-                    surf = ax.plot_surface(x_, y_, u, cmap=cm.coolwarm,
-                                       linewidth=0, antialiased=False);
-                                       # Customize the z axis.
-                    #ax.set_zlim(-0.10, 1.40);
-                    for angle in range(0,230):
-                        ax.view_init(40,angle)
-                    ax.zaxis.set_major_locator(LinearLocator(10));
-                    ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'));
-                    plt.xlabel("x")
-                    plt.ylabel("y")
-                    name = "2dim_"+method+": dx = "+str(dx)
-                    plt.title(name)
-                    #fig.savefig("plots/2dim/"+method+"/"+str(dx)+"/"+name+","+str(t)+".png")
-                    plt.close()
-
-
-
-    # FIX PLOTTING AV ANALYTISK; LEGG ANALYTISK I C++
-                    """
-                    if iteration == 0:
-                        fig = plt.figure()
-                        x_a,y_a = np.meshgrid(x_analytic,y_analytic)
-                        ax = fig.gca(projection='3d');
+                        ax = fig.gca(projection='3d',xlim = (0,1.0),ylim = (0,1.0),zlim = (0,1.0));
                         # Plot the surface.
-                        surf = ax.plot_surface(x_a, y_a, u_analytic1, cmap=cm.coolwarm,
+                        surf = ax.plot_surface(x_, y_, u, cmap=cm.coolwarm,
                                            linewidth=0, antialiased=False);
                                            # Customize the z axis.
                         #ax.set_zlim(-0.10, 1.40);
@@ -268,9 +249,19 @@ elif dim == "2":
                         ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'));
                         plt.xlabel("x")
                         plt.ylabel("y")
-                        plt.title("Analytic")
-                        fig.savefig("plots/2dim/Analytic/"+str(t)+".png")
-                    iteration += 1
-                    """
+                        name = "2-dim "+method+": dx = "+str(dx)
+                        plt.title(name)
+                        fig.savefig("plots/2dim/"+method+"/"+str(dx)+"/"+name.replace(" ","")+".pgf")
+                        plt.close()
+
+                        #Printing maximum absolute differences
+                    u_list.append(u)
+    combinations = len(dxlist)*3
+    print("Mean absolute differences between implicit and analytical")
+    for i in range(combinations):
+        diff = np.mean(abs(u_list[i]-u_list[combinations+i]))
+
+        print(diff)
+
 else:
     print("Please write either 1 or 2")
