@@ -205,9 +205,9 @@ void analytic_2D(mat &u, int N, double t){
   vec y = linspace<vec>(0,1,N+2);
 
 
-  for (int i = 0; i < N+1; i++){
-    for (int j = 0; j < N+1; j++){
-      u(i,j) = sin(pi*x(j))*sin(pi*y(j))*exp(-2*pi*pi*t);
+  for (int i = 0; i < N+2; i++){
+    for (int j = 0; j < N+2; j++){
+      u(i,j) = sin(pi*x(i))*sin(pi*y(j))*exp(-2*pi*pi*t);
     }
   }
 }
@@ -217,8 +217,12 @@ void analytic_2D(mat &u, int N, double t){
 // Function for setting up the iterative Jacobi solver
 int JacobiSolver(mat &u, double dx, double dt, double abstol, int maxiter){
   ofstream ofile;
-  string file = "2dim_implicit:"+to_string(dx);
-  file.erase ( file.find_last_not_of('0') + 1, std::string::npos );
+
+  string dxstring = to_string(dx);
+  dxstring.erase ( dxstring.find_last_not_of('0') + 1, std::string::npos );
+  string dtstring = to_string(dt);
+  dtstring.erase ( dtstring.find_last_not_of('0') + 1, std::string::npos );
+  string file = "2dim_Implicit:dx="+dxstring+"dt="+dtstring;
   ofile.open(file);
   ofile << u;
 
