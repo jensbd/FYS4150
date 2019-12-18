@@ -1,4 +1,4 @@
-# Project 4
+# Project 5
 
 Compile `main.cpp` as `c++ -O3 -fopenmp -o <executable> main.cpp Functions.cpp` and run with `./<executable>`
 
