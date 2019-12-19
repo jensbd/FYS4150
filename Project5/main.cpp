@@ -190,7 +190,6 @@ for (int d = 0; d<dt_list.size(); d++){
     }
 
 
-  //double Total_start = omp_get_wtime();
 
   /*
   double start = omp_get_wtime();
@@ -221,11 +220,7 @@ for (int d = 0; d<dt_list.size(); d++){
   dtstring.erase ( dtstring.find_last_not_of('0') + 1, std::string::npos );
   string file = "2dim_Analytic:dx="+dxstring+"dt="+dtstring;
 
-  // Step length in time
-  dt = dx;
 
-  // Defining alpha
-  alpha = dt/dx/dx;
   ofile.open(file);
   double temp;
   for (int t = 0; t < T; t++){
@@ -267,9 +262,7 @@ T = int(1/dt);
   double comptime = end-start;
   cout << "Time used for Jacobis method: " << comptime << " s" << endl;
 
-  //double Total_end = omp_get_wtime();
-  //double Total_comptime = Total_end - Total_start;
-  //cout << "Total time used for 2-dim implementation: " << Total_comptime << " s" << endl;
+
 
 }
 
@@ -290,6 +283,7 @@ if (Task == "2"){
     }
 
   }
+
 }
 
   return 0;
